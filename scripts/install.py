@@ -152,7 +152,9 @@ def main():
         layout_target = layouts / f'{LAYOUT}.json'
         back_up_if_changed(layout_target, repo / 'layouts' / f'{LAYOUT}.json',
                            layouts / f'{LAYOUT}.json.before-install-{stamp}')
-        shutil.copy2(repo / 'layouts' / f'{LAYOUT}.png', layouts / f'{LAYOUT}.png')
+        # Its picture in Herdr's layout picker (the layout's `preview`); an older install's screenshot goes.
+        shutil.copy2(repo / 'layouts' / f'{LAYOUT}.svg', layouts / f'{LAYOUT}.svg')
+        (layouts / f'{LAYOUT}.png').unlink(missing_ok=True)
         shutil.copy2(repo / 'layouts' / f'{LAYOUT}.json', layout_target)
 
         merge_programs(repo / 'programs.json', home / 'programs.json')

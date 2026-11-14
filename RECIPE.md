@@ -14,7 +14,7 @@ installer adds it, and adding this layout by hand means adding that repository's
 
 To add it, run `./install.sh` from a clone (or `python scripts/install.py`). By hand, copy
 more than the layout and its mods: `layouts/harns.json` with its picture
-`layouts/harns.png`, every folder in `mods/` (the rings' images live in
+`layouts/harns.svg` (the sketch Herdr's layout picker shows), every folder in `mods/` (the rings' images live in
 `machine-stats`), `themes/harness.json` and `brand-assets/`, merge `programs.json`'s
 entries into yours, and add `layouts/harns.keys.json` to your `keys.json` as its `layout:harns` section.
 

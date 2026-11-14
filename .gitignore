@@ -19,7 +19,7 @@
 !/layouts/
 /layouts/*
 !/layouts/harns.json
-!/layouts/harns.png
+!/layouts/harns.svg
 !/layouts/harns.keys.json
 !/mods/
 /mods/*

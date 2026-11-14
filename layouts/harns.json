@@ -203,7 +203,7 @@
                     "color":  "#00000000"
                 },
     "titlebar":  "none",
-    "preview":  "layouts/harns.png",
+    "preview":  "layouts/harns.svg",
     "traffic_lights":  [
                            12,
                            16
