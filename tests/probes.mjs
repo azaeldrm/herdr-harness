@@ -1,6 +1,6 @@
 // The stats and account probes, run the way each platform runs them: the Python probes on
 // Linux and macOS (the machines that use them), the PowerShell probes on Windows.
-import { linuxProbe, macosProbe, pythonAccountProbe, windowsProbe, windowsAccountProbe } from '../mods/machine-stats/probes.js';
+import { linuxProbe, macosProbe, pythonAccountProbe, windowsProbe, windowsAccountProbe } from '../src/shared/probes.js';
 import { execFileSync, spawnSync } from 'child_process';
 import { chmodSync, mkdtempSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';

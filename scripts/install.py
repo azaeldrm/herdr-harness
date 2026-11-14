@@ -1,11 +1,14 @@
-import io, json, os, re, shutil, subprocess, sys, tarfile, tempfile, time, urllib.request
+import json, os, re, shutil, subprocess, sys, time
 from pathlib import Path
 
-MODS = ['harness-chrome', 'harness-files', 'harness-pane', 'harness-settings', 'harness-simulator', 'harness-tabs', 'machine-agents', 'machine-metrics',
-        'machine-new-menu', 'machine-stats', 'workspace-status-machine']
 LAYOUT = 'harns'
+# The harns listing's share folder: what this installs (its mods/ built from src/ by scripts/package.py).
+SHARE = Path('layouts') / LAYOUT
 CHAT = 'herdr-chat'
-CHAT_REPO = 'https://github.com/azaeldrm/herdr-chat'
+# Mods older harns installs added that harns no longer has: removed from the Herdr home. machine-stats and
+# machine-metrics became code built into the mods that use them, machine-new-menu became part of machine-agents, and
+# harness-pane went unused.
+RETIRED = ['harness-pane', 'machine-stats', 'machine-metrics', 'machine-new-menu']
 
 
 def fail(message):
@@ -92,40 +95,12 @@ def back_up_if_changed(target, new, backup):
     return True
 
 
-def fetch_chat(source, into):
-    """The herdr-chat repository at `source` in the folder `into`: cloned with git, else downloaded."""
-    if shutil.which('git'):
-        clone = into / 'clone'
-        if subprocess.run(['git', 'clone', '--quiet', '--depth', '1', source, str(clone)],
-                          capture_output=True).returncode == 0:
-            return clone
-    if source.startswith('https://github.com/'):
-        with urllib.request.urlopen(f'{source}/archive/refs/heads/main.tar.gz', timeout=60) as response:
-            data = response.read()
-        with tarfile.open(fileobj=io.BytesIO(data)) as archive:
-            if hasattr(tarfile, 'data_filter'):
-                archive.extractall(into / 'download', filter='data')
-            else:
-                archive.extractall(into / 'download')
-        return next((into / 'download').iterdir())
-    raise RuntimeError(f'could not get {source}')
-
-
-def install_chat(home, source=CHAT_REPO):
-    """Installs the herdr-chat mod the layout uses when it isn't installed; an installed copy is kept. Returns what happened."""
-    target = home / 'mods' / CHAT
-    if target.is_dir():
-        return 'kept'
-    with tempfile.TemporaryDirectory() as directory:
-        repo = fetch_chat(source, Path(directory))
-        mod = repo / 'mods' / CHAT
-        if not (mod / 'main.js').is_file():
-            raise RuntimeError(f'{source} has no mods/{CHAT}')
-        staging = home / 'mods' / f'.{CHAT}.new'
-        shutil.rmtree(staging, ignore_errors=True)
-        shutil.copytree(mod, staging)
-        staging.rename(target)
-    return 'installed'
+def retire(home):
+    """Removes the mods older harns installs added that harns no longer has. Returns the ones removed."""
+    removed = [name for name in RETIRED if (home / 'mods' / name).is_dir()]
+    for name in removed:
+        shutil.rmtree(home / 'mods' / name)
+    return removed
 
 
 def main():
@@ -133,46 +108,45 @@ def main():
     relays = '--no-relays' not in sys.argv[1:]
     chat = '--no-chat' not in sys.argv[1:]
     repo = Path(__file__).resolve().parent.parent
+    share = repo / SHARE
     home = herdr_home()
     app = find_app()
 
-    if subprocess.run([sys.executable, str(repo / 'scripts' / 'build-mods.py')]).returncode != 0:
-        fail('Generating the built mod files failed (scripts/build-mods.py).')
+    if subprocess.run([sys.executable, str(repo / 'scripts' / 'package.py')]).returncode != 0:
+        fail('Building the share folders failed (scripts/package.py).')
+    # herdr-chat is one of the listing's mods; --no-chat leaves whatever copy is installed as it is.
+    mods = sorted(p.name for p in (share / 'mods').iterdir() if p.is_dir() and (chat or p.name != CHAT))
 
     if not same_folder(repo, home):
         stamp = time.strftime('%Y%m%d-%H%M%S')
-        for mod in MODS:
-            copy_tree(repo / 'mods' / mod, home / 'mods' / mod)
+        for mod in mods:
+            copy_tree(share / 'mods' / mod, home / 'mods' / mod)
+        removed = retire(home)
+        if removed:
+            print(f'Removed mods harns no longer uses: {", ".join(removed)}')
         (home / 'themes').mkdir(parents=True, exist_ok=True)
-        shutil.copy2(repo / 'themes' / 'harness.json', home / 'themes' / 'harness.json')
-        copy_tree(repo / 'brand-assets', home / 'brand-assets')
+        shutil.copy2(share / 'themes' / 'harness.json', home / 'themes' / 'harness.json')
+        copy_tree(share / 'brand-assets', home / 'brand-assets')
 
         layouts = home / 'layouts'
         layouts.mkdir(parents=True, exist_ok=True)
         layout_target = layouts / f'{LAYOUT}.json'
-        back_up_if_changed(layout_target, repo / 'layouts' / f'{LAYOUT}.json',
+        back_up_if_changed(layout_target, share / 'layouts' / f'{LAYOUT}.json',
                            layouts / f'{LAYOUT}.json.before-install-{stamp}')
         # Its picture in Herdr's layout picker (the layout's `preview`); an older install's screenshot goes.
-        shutil.copy2(repo / 'layouts' / f'{LAYOUT}.svg', layouts / f'{LAYOUT}.svg')
+        shutil.copy2(share / 'layouts' / f'{LAYOUT}.svg', layouts / f'{LAYOUT}.svg')
         (layouts / f'{LAYOUT}.png').unlink(missing_ok=True)
-        shutil.copy2(repo / 'layouts' / f'{LAYOUT}.json', layout_target)
+        shutil.copy2(share / 'layouts' / f'{LAYOUT}.json', layout_target)
 
-        merge_programs(repo / 'programs.json', home / 'programs.json')
+        merge_programs(share / 'programs.json', home / 'programs.json')
 
-        added = merge_keys(repo / 'layouts' / f'{LAYOUT}.keys.json', home / 'keys.json', home / f'keys.json.before-install-{stamp}')
+        added = merge_keys(share / 'layouts' / f'{LAYOUT}.keys.json', home / 'keys.json', home / f'keys.json.before-install-{stamp}')
         if added is None:
             print(f'note: {home / "keys.json"} does not exist yet. Open Herdr once, then run this again for the layout\'s keys.')
         elif added:
             print(f'Added the layout\'s keys to keys.json: {", ".join(added)}')
 
-    if chat:
-        try:
-            if install_chat(home) == 'installed':
-                print(f'Installed {CHAT} from {CHAT_REPO}')
-        except Exception as error:
-            print(f'warning: could not install {CHAT} ({error}).', file=sys.stderr)
-
-    checked = MODS + ([CHAT] if (home / 'mods' / CHAT).is_dir() else [])
+    checked = mods + ([CHAT] if CHAT not in mods and (home / 'mods' / CHAT).is_dir() else [])
     for mod in checked:
         result = subprocess.run([app, 'check', str(home / 'mods' / mod)], capture_output=True, text=True)
         if result.returncode != 0:
@@ -183,11 +157,11 @@ def main():
     if relays and subprocess.run([sys.executable, str(repo / 'scripts' / 'install-context.py')]).returncode != 0:
         fail('Installing the relays failed (scripts/install-context.py). --no-relays skips them.')
 
-    layout = (repo / 'layouts' / f'{LAYOUT}.json').read_text(encoding='utf-8')
+    layout = (share / 'layouts' / f'{LAYOUT}.json').read_text(encoding='utf-8')
     needed = sorted(set(re.findall(r'"mod":\s*"([^"]+)"', layout)))
     missing = [mod for mod in needed if not (home / 'mods' / mod).is_dir()]
     if missing:
-        where = f' {CHAT} comes from {CHAT_REPO}.' if CHAT in missing else ''
+        where = f' {CHAT} is installed without --no-chat.' if CHAT in missing else ''
         if any(mod != CHAT for mod in missing):
             where += ' The others are Herdr\'s own: open Herdr once so it writes them.'
         print('warning: the layout also uses mods that are not installed: ' + ', '.join(missing) + '.' + where +

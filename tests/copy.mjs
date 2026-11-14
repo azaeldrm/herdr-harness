@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { withCopyRows, splitCode } from "../mods/herdr-chat/model/transcript.js";
+import { withCopyRows, splitCode } from "../src/herdr-chat/model/transcript.js";
 
 const u = text => ({ kind: "message", role: "user", text });
 const a = text => ({ kind: "message", role: "assistant", text });
@@ -31,7 +31,7 @@ assert.equal(splitCode("plain"), null);
 console.log("copy rows: ok");
 
 // A turn's numbers: ticks become a "stats" row at the turn's end, which lands on the response's copy row.
-const { TurnClock } = await import("../mods/herdr-chat/model/session.js");
+const { TurnClock } = await import("../src/herdr-chat/model/session.js");
 const clock = new TurnClock(), rowsOut = [];
 for (const e of [{ at: 100, p: 1 }, { at: 102, id: "a", out: 10 }, { at: 104, id: "a", out: 40 }, { at: 110 }, { at: 111, id: "b", out: 20 }, { at: 113, id: "b", out: 20 }]) clock.tick(e);
 clock.end(rowsOut);

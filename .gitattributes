@@ -1,6 +1,8 @@
 # Pele, copied from npm by scripts/vendor-pele.mjs. Kept byte for byte (no line-ending
 # conversion), so `npm run check:pele` compares it exactly; collapsed in GitHub diffs.
-mods/harness-files/vendor/** -text linguist-vendored linguist-generated
+src/**/vendor/** -text linguist-vendored linguist-generated
+layouts/**/vendor/** -text linguist-vendored linguist-generated
+mods/**/vendor/** -text linguist-vendored linguist-generated
 
 # Shell scripts run on Linux and macOS, so they keep LF line endings on every checkout.
 *.sh text eol=lf

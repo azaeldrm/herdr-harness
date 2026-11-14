@@ -12,7 +12,7 @@ const walk = dir => readdirSync(dir).flatMap(f => f === "vendor" ? [] : statSync
 
 const HOST = {
   "components/chat-list.js": [],
-  "components/question-card.js": ["sending", "note", "key", "sessionPath", "list.following", "list.follow"],
+  "components/question-card.js": ["sending", "note", "key", "sessionPath", "list.following", "list.follow", "zoom"],
   "components/composer.js": ["sending", "note", "key", "sessionPath", "list.following", "list.follow", "card.choices", "card.stillCurrent", "stop", "stopping", "showPending", "dropPending", "backdropShown"],
   "components/session-reader.js": ["card.read", "list.following", "list.follow"],
   "components/skill-menu.js": ["input", "keepDraft"],

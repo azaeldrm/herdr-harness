@@ -1,7 +1,7 @@
 // harness-files: Markdown split into prose, code, mermaid and front matter; links resolved.
 import assert from "node:assert/strict";
-import { parse, resolveLink, imageTarget } from "../mods/harness-files/parse.js";
-import { sniff, hashBytes, toBase64 } from "../mods/harness-files/bytes.js";
+import { parse, resolveLink, imageTarget } from "../src/harness-files/parse.js";
+import { sniff, hashBytes, toBase64 } from "../src/harness-files/bytes.js";
 
 const doc = parse([
   "---", "title: Notes", "---",

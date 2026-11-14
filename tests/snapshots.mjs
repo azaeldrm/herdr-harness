@@ -1,4 +1,4 @@
-import { newestSnapshots } from '../mods/machine-agents/snapshots.js';
+import { newestSnapshots } from '../src/machine-agents/snapshots.js';
 
 let failed = 0;
 const check = (name, got, want) => {

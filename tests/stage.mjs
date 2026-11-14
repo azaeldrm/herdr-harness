@@ -3,7 +3,7 @@ import { tmpdir } from "os";
 import { join, dirname } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 
-export const MOD = join(dirname(fileURLToPath(import.meta.url)), "..", "mods", "herdr-chat");
+export const MOD = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "herdr-chat");
 
 export function stage() {
   const dir = mkdtempSync(join(tmpdir(), "herdr-chat-test-"));

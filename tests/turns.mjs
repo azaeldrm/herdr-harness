@@ -1,4 +1,4 @@
-import { look, changedHosts, machinesChanged, hostOf, endedApps } from '../mods/machine-stats/turns.js';
+import { look, changedHosts, machinesChanged, hostOf, endedApps } from '../src/shared/turns.js';
 
 let failed = 0;
 const check = (name, got, want) => {

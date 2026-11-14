@@ -11,15 +11,18 @@ export const DIAGRAMS = ["flowchart", "sequence", "state", "class", "er", "gantt
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const pkg = join(root, "node_modules", "pele");
 const esm = join(pkg, "dist", "esm");
-const out = join(root, "mods", "harness-files", "vendor", "pele");
+// Both mods that draw mermaid carry the same copy: the Files panel and the chat.
+const OUTS = ["harness-files", "herdr-chat"].map(mod => join(root, "src", mod, "vendor", "pele"));
 const check = process.argv.includes("--check");
 
 const pinned = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).devDependencies.pele;
 if (!existsSync(pkg)) {
-  if (check && existsSync(join(out, "README.txt"))) {
-    const copied = /Pele (\S+)/.exec(readFileSync(join(out, "README.txt"), "utf8"))?.[1];
-    if (copied !== pinned) { console.error(`vendor/pele holds Pele ${copied}, package.json pins ${pinned}: run npm install && npm run vendor:pele`); process.exit(1); }
-    console.log(`vendor/pele is Pele ${copied} (contents not compared: run npm install for that)`);
+  if (check && OUTS.every(out => existsSync(join(out, "README.txt")))) {
+    for (const out of OUTS) {
+      const copied = /Pele (\S+)/.exec(readFileSync(join(out, "README.txt"), "utf8"))?.[1];
+      if (copied !== pinned) { console.error(`${relative(root, out)} holds Pele ${copied}, package.json pins ${pinned}: run npm install && npm run vendor:pele`); process.exit(1); }
+    }
+    console.log(`vendor/pele is Pele ${pinned} in both mods (contents not compared: run npm install for that)`);
     process.exit(0);
   }
   console.error("node_modules/pele is missing: run npm install first"); process.exit(1);
@@ -43,19 +46,22 @@ const wanted = new Map([...files].map(f => [f, readFileSync(join(esm, f))]));
 wanted.set("LICENSE", readFileSync(join(pkg, "LICENSE")));
 wanted.set("README.txt", Buffer.from(readme));
 
-const existing = [];
-const walk = d => { if (existsSync(d)) for (const n of readdirSync(d)) { const p = join(d, n); statSync(p).isDirectory() ? walk(p) : existing.push(relative(out, p)); } };
-walk(out);
-
-if (check) {
-  const problems = [];
-  for (const [f, bytes] of wanted) if (!existsSync(join(out, f)) || !readFileSync(join(out, f)).equals(bytes)) problems.push(`differs or missing: ${f}`);
-  for (const f of existing) if (!wanted.has(f)) problems.push(`not from Pele ${version}: ${f}`);
-  if (problems.length) { console.error(problems.join("\n") + "\nrun npm run vendor:pele"); process.exit(1); }
-  console.log(`vendor/pele matches Pele ${version}: ${wanted.size} files`);
-} else {
-  rmSync(out, { recursive: true, force: true });
-  for (const [f, bytes] of wanted) { mkdirSync(dirname(join(out, f)), { recursive: true }); writeFileSync(join(out, f), bytes); }
-  const kb = [...wanted.values()].reduce((n, b) => n + b.length, 0) >> 10;
-  console.log(`copied Pele ${version}: ${wanted.size} files, ${kb} KB, into ${relative(root, out)}`);
+let failed = false;
+for (const out of OUTS) {
+  const existing = [];
+  const walk = d => { if (existsSync(d)) for (const n of readdirSync(d)) { const p = join(d, n); statSync(p).isDirectory() ? walk(p) : existing.push(relative(out, p)); } };
+  walk(out);
+  if (check) {
+    const problems = [];
+    for (const [f, bytes] of wanted) if (!existsSync(join(out, f)) || !readFileSync(join(out, f)).equals(bytes)) problems.push(`differs or missing: ${f}`);
+    for (const f of existing) if (!wanted.has(f)) problems.push(`not from Pele ${version}: ${f}`);
+    if (problems.length) { console.error([`${relative(root, out)}:`, ...problems, "run npm run vendor:pele"].join("\n")); failed = true; }
+    else console.log(`${relative(root, out)} matches Pele ${version}: ${wanted.size} files`);
+  } else {
+    rmSync(out, { recursive: true, force: true });
+    for (const [f, bytes] of wanted) { mkdirSync(dirname(join(out, f)), { recursive: true }); writeFileSync(join(out, f), bytes); }
+    const kb = [...wanted.values()].reduce((n, b) => n + b.length, 0) >> 10;
+    console.log(`copied Pele ${version}: ${wanted.size} files, ${kb} KB, into ${relative(root, out)}`);
+  }
 }
+if (failed) process.exit(1);

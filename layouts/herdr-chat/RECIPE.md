@@ -111,7 +111,7 @@ The swap is `layout.select { stack: "chat-view", child: "chat-panel" | "terminal
 the terminal itself belongs to the layout. The same mod runs twice: as the chat
 (`props.role: "chat"`) and as the terminal's pane header (it gets `{ pane, terminal }`).
 
-**Mod** `mods/herdr-chat/` (`mod.json` is `{"place":"none"}`):
+**Mod** `mods/herdr-chat/` (`mod.json` is `{"place":"none"}`; built from the repository's `src/herdr-chat` by `scripts/package.py`):
 
 | Path | Role |
 |---|---|

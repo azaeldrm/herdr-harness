@@ -1,7 +1,6 @@
 import importlib.util
 import json
 from pathlib import Path
-import subprocess
 import tempfile
 import unittest
 
@@ -10,48 +9,19 @@ install = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(install)
 
 
-def chat_repo(folder):
-    """A git repository shaped like herdr-chat, with one file in its mod."""
-    mod = folder / 'mods' / 'herdr-chat'
-    mod.mkdir(parents=True)
-    (mod / 'main.js').write_text('export default class Chat {}\n')
-    git = ['git', '-c', 'user.name=test', '-c', 'user.email=test@example.com', '-C', str(folder)]
-    subprocess.run(git + ['init', '--quiet'], check=True)
-    subprocess.run(git + ['add', '.'], check=True)
-    subprocess.run(git + ['commit', '--quiet', '-m', 'chat'], check=True)
-    return str(folder)
-
-
-class InstallChatTests(unittest.TestCase):
-    def test_a_missing_chat_mod_is_installed(self):
+class RetireTests(unittest.TestCase):
+    def test_retired_mods_go_and_the_rest_stay(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            home = root / 'home'
-            (home / 'mods').mkdir(parents=True)
-            self.assertEqual(install.install_chat(home, chat_repo(root / 'chat')), 'installed')
-            self.assertTrue((home / 'mods/herdr-chat/main.js').is_file())
-            self.assertFalse((home / 'mods/.herdr-chat.new').exists())
-
-    def test_an_installed_chat_mod_is_kept(self):
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            home = root / 'home'
-            (home / 'mods/herdr-chat').mkdir(parents=True)
-            (home / 'mods/herdr-chat/main.js').write_text('mine\n')
-            self.assertEqual(install.install_chat(home, chat_repo(root / 'chat')), 'kept')
-            self.assertEqual((home / 'mods/herdr-chat/main.js').read_text(), 'mine\n')
-
-    def test_a_source_that_cannot_be_reached_installs_nothing(self):
-        with tempfile.TemporaryDirectory() as directory:
-            home = Path(directory) / 'home'
-            (home / 'mods').mkdir(parents=True)
-            with self.assertRaises(Exception):
-                install.install_chat(home, str(Path(directory) / 'missing'))
-            self.assertFalse((home / 'mods/herdr-chat').exists())
+            home = Path(directory)
+            for name in ('machine-stats', 'harness-pane', 'machine-agents', 'mine'):
+                (home / 'mods' / name).mkdir(parents=True)
+            self.assertEqual(sorted(install.retire(home)), ['harness-pane', 'machine-stats'])
+            self.assertEqual(sorted(p.name for p in (home / 'mods').iterdir()), ['machine-agents', 'mine'])
+            self.assertEqual(install.retire(home), [])
 
 
 class MergeKeysTests(unittest.TestCase):
-    OURS = Path(__file__).parents[1] / 'layouts/harns.keys.json'
+    OURS = Path(__file__).parents[1] / 'layouts/harns/layouts/harns.keys.json'
 
     def test_missing_keys_are_added_and_the_rest_kept(self):
         with tempfile.TemporaryDirectory() as directory:

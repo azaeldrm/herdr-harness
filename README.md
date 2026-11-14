@@ -1,12 +1,22 @@
 # harns
 
-A herdr layout organized by machine: each machine's CPU, RAM and GPU load and its agents
-in the sidebar, agent tabs as a chat or a terminal, and Claude Code and Codex quota in the
-status bar. Everything goes through herdr's own machine connections.
+Layouts and mods for the [Herdr](https://herdr.dev) app, in one repository:
 
-![harns](preview.png)
+| Listing | What it is | Folder |
+|---|---|---|
+| **harns** (layout) | A window organized by machine: each machine's agents in the sidebar, agent tabs as a chat or a terminal, Claude Code and Codex quota in the status bar | [`layouts/harns`](layouts/harns/RECIPE.md) |
+| **herdr-chat** (layout) | An agent's terminal shown as a chat, with a Chat / Terminal toggle | [`layouts/herdr-chat`](layouts/herdr-chat/RECIPE.md) |
 
-[RECIPE.md](RECIPE.md) describes it in full, as a brief to build it from.
+Each folder is one listing on herdr.dev: its `RECIPE.md` (the brief to build it from), its `preview.png`, and the files
+an agent copies to add it. The rest of this page is about harns.
+
+harns is a herdr layout organized by machine: each machine's CPU, RAM and GPU load and its agents in the sidebar, agent
+tabs as a chat or a terminal, and Claude Code and Codex quota in the status bar. Everything goes through herdr's own
+machine connections.
+
+![harns](layouts/harns/preview.png)
+
+[Its RECIPE.md](layouts/harns/RECIPE.md) describes it in full, as a brief to build it from.
 
 ## Features
 
@@ -26,7 +36,7 @@ its system, CPU, memory, GPUs and disks.
 
 ![A machine's details](docs/machine-card.png)
 
-**A chat for every agent.** An agent's tab is a chat ([herdr-chat](https://github.com/azaeldrm/herdr-chat)) or its
+**A chat for every agent.** An agent's tab is a chat ([herdr-chat](layouts/herdr-chat/RECIPE.md)) or its
 live terminal, one click apart. Mermaid diagrams in replies are drawn by [Pele](https://github.com/obsidianmd/pele).
 
 ![A mermaid diagram in the chat](docs/diagram.png)
@@ -55,9 +65,8 @@ offers the Simulator. Drag a machine's band to reorder the machines in the sideb
 
 ## Install
 
-Needs the Herdr app and Python 3 on each machine. The chat in agent tabs is
-[herdr-chat](https://github.com/azaeldrm/herdr-chat): the installer adds it when it isn't
-installed yet (`--no-chat` to skip) and never replaces a copy you have.
+Needs the Herdr app and Python 3 on each machine. The chat in agent tabs is herdr-chat, one of
+harns's mods: the installer installs it with the rest (`--no-chat` leaves an installed copy as it is).
 
 Ask your agent to add this layout, or run `./install.sh` from a clone (on Windows, from Git
 Bash, or run `python scripts/install.py` in PowerShell, with the same options). It builds the
@@ -88,7 +97,7 @@ Optional:
   Pi sessions already running pick up the relay after `/reload`, typed in their terminal.
 - **Simulator** (Windows and Linux): the panel beside Files and Changes runs Android virtual devices
   from the Android SDK (`ANDROID_HOME`, else `%LOCALAPPDATA%\Android\Sdk` on Windows and `~/Android/Sdk` on
-  Linux). RECIPE.md's "Simulator setup" lists what to install and how to create a device. Each session (an agent's tab) gets its
+  Linux). [RECIPE.md](layouts/harns/RECIPE.md)'s "Simulator setup" lists what to install and how to create a device. Each session (an agent's tab) gets its
   own emulator, and its sub-agents use the same one; when another session needs one, the panel
   copies a virtual device for it. The panel shows the focused session's emulator, its own
   window placed over the panel so it runs at full speed with its own input, and the others
@@ -102,7 +111,7 @@ Optional:
   its virtual device says; storage is the virtual device's own. These are limits rather than
   reservations: cores are threads the system runs anywhere, and memory is taken as Android uses
   it (though memory Android has filled isn't given back until the emulator stops). The defaults
-  are in `mods/harness-simulator/emulator.json`; change them in `~/.config/herdr-app/harness.json`,
+  are in the Simulator mod's `emulator.json` (`src/harness-simulator/emulator.json` here); change them in `~/.config/herdr-app/harness.json`,
   which updates don't overwrite, as `{ "emulator": { "default": { "memory": 6144 }, "devices":
   { "harns_phone": { "cores": 6 } } } }` (`memory` in MB, `cores`, `gpu`; `devices` by a virtual
   device's name, for that one only). The panel title's tooltip shows what the session's emulator
@@ -131,22 +140,25 @@ Optional:
 | Linux | Python 3, `/proc` | NVIDIA | In the panel on Hyprland, else its own window |
 | macOS | Python 3, `top` and `vm_stat` | — | — |
 
-Each machine's platform is detected once (`mods/machine-stats/platforms.js`). GPU vendors
-are entries in `mods/machine-stats/gpus.js`, with a place for AMD, Intel and Apple.
+Each machine's platform is detected once (`src/shared/platforms.js`). GPU vendors
+are entries in `src/shared/gpus.js`, with a place for AMD, Intel and Apple.
 
 ## Working on it
 
-- Edit the sources in a clone, then run the installer (`--no-switch --no-relays` while
-  developing). It runs `scripts/build-mods.py`, which writes the copies herdr needs (see
-  RECIPE.md, Watch out), and copies the result into `~/.config/herdr-app`.
+- Each mod's source is in `src/` (code several mods share is in `src/shared/`). The listings' `mods/` folders are built
+  from it by `scripts/package.py`: don't edit them. Edit `src/`, then run the installer (`--no-switch --no-relays`
+  while developing): it builds the listings and copies harns's into `~/.config/herdr-app`.
+- A listing is a folder under `layouts/` (or, for a mod on its own, `mods/`) with its `RECIPE.md`, `preview.png` and
+  files; `package.py`'s `LISTINGS` says which mods each one ships.
 - Check with `herdr-app check <mod folder>`, `herdr-app status` and `herdr-app shot`.
-- Tests: `npm test` runs them all (the Python unit tests, the Node tests, and a check that the
-  vendored Pele matches its pin; after `npm install` it compares every byte). It finds Python 3
+- Tests: `npm test` runs them all (the Python unit tests, harns's and herdr-chat's Node and Python tests, a check that
+  the vendored Pele matches its pin, after `npm install` byte for byte, and a check that every listing is built from
+  the current `src/`). A few of the chat's tests need Linux or macOS and say they're skipped on Windows. It finds Python 3
   as `python3`, `python` or `py -3`, so it runs as installed on Windows, Linux and macOS. The
   stats and account probes are tested the way each platform runs them: PowerShell on Windows,
   Python on Linux and macOS.
 - `harness-files` is herdr's Files panel where Markdown and `.mmd` files open in a floating window as a readable
   document: images (beside the file or on its machine; web images show as links, never fetched) and
-  mermaid blocks drawn by Pele (the same pinned version as herdr-chat). Preview and
+  mermaid blocks drawn by Pele (the same vendored copy as herdr-chat's). Preview and
   Source in its header switch views. To update Pele, change the pin in `package.json`, then run
   `npm install && npm run vendor:pele`.

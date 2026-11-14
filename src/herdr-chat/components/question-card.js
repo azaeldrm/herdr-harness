@@ -7,6 +7,7 @@ import { parsePrompt, looksLikePrompt, keysFor, typedAnswer, sameOption, preview
 import { askDaemon } from "./session-reader.js";
 import { shared } from "herdr";
 import { COLUMN, mono, icon, keyButton, checkbox } from "../ui/primitives.js";
+import { designPx } from "../measure.js";
 
 const BODY_HEIGHT = 264;
 const ROW_CHARS = 96;
@@ -36,7 +37,7 @@ function bodyHeight(q, grown = 0) {
 
 export class QuestionCard {
   constructor(host) {
-    // A question on the agent's screen: read, shown as a card, answered with the harness's keys. `host` is the view: its `sending` lock, `note`, `key` and `list`.
+    // A question on the agent's screen: read, shown as a card, answered with the harness's keys. `host` is the view: its `sending` lock, `note`, `key`, `list` and `zoom`.
     this.host = host;
     this.choices = null; this.screen = ""; this.unread = false; this.currentStep = "";
     this.cardFold = ""; this.cardFolded = false;
@@ -62,7 +63,8 @@ export class QuestionCard {
   }
 
   rowSized(kind, height, cx) {
-    // An answer row's height as drawn: past one line (34 px), the options area grows by the difference.
+    // An answer row's height as drawn, in design px (herdr reports zoomed ones): past one line (34 px), the options
+    // area grows by the difference.
     const extra = Math.max(0, Math.round(height - 34));
     if ((this.rowExtra ??= {})[kind] === extra) return;
     this.rowExtra[kind] = extra;
@@ -355,7 +357,7 @@ export class QuestionCard {
           .child(div().flex_1().min_w(0).text_size(12.5).text_color(t.muted).child(o.typed ? `${o.typed} (edit it in the terminal)` : "Type your own answer in the terminal"))
           : o.input ? v_flex().id(`choice-${i}`).flex_none().w_full().px(10).py(5).rounded(7)
           .border_1().border_color(t.border).bg(t.background)
-          .on_size_change((size, cx) => this.rowSized(o.input, size.height, cx))
+          .on_size_change((size, cx) => this.rowSized(o.input, designPx(size.height, this.host.zoom ?? 1), cx))
           // The number or checkbox stays by the first line as the box grows.
           .child(h_flex().gap(7).items_start()
             .child(o.checked === undefined
