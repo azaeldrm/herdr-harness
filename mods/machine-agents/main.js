@@ -133,21 +133,22 @@ function haloed(src, size, color, ring) {
 
 function agentPic(t, p, size, color, ring, sub = false, hop = false, tint = null, corner = null) {
   // The agent icon (a sub-agent's: the same bot without its antenna), with its program's icon small at its bottom right
-  // on a halo of the row's color (badgeOf). `hop` (working): that program logo hops in amber from side to side over the bot, its
-  // halo masking the bot as it passes, a ripple spreading where it lands.
+  // on a halo of the row's color (badgeOf). `hop` (working; the view's beat, { n, up, go }): that logo hops in amber
+  // from side to side over the bot, its halo masking the bot as it passes, a ripple spreading where it lands.
   const bot = svg(`mods/harness-chrome/${sub ? "bot-small" : "bot"}.svg`).size(size).flex_none().text_color(color);
   // The logo's color: amber while it hops (working), else `tint` (amber, still: it needs you mid-task), else the row's.
   const badge = badgeOf(p, Math.round(size * 0.65), hop ? t.working : tint ?? color, ring);
-  // `corner`: a mark on its own halo right above the program logo, as if it spoke (same column as the logo, right -5): "ask" (it needs you) a red question mark (the
-  // health bar's red), "done" (finished, not yet looked at) the green check.
-  const mark = corner === "ask" ? ["mods/harness-chrome/question.svg", "#d88179"] : corner === "done" ? ["mods/machine-agents/circle-check.svg", t.ansi2 ?? t.done] : null;
-  const question = () => haloed(mark[0], Math.round(size * 0.6), mark[1], ring).absolute().right(-5).top(-3);
+  // `corner`: a mark on its own halo right above the logo (its column, right -5), as if the logo spoke: "ask" (it needs
+  // you) a red question mark, the health bar's red; "done" (finished, not yet looked at) the green check.
+  const mark = corner === "ask" ? ["mods/harness-chrome/question.svg", "#d88179"]
+    : corner === "done" ? ["mods/machine-agents/circle-check.svg", t.ansi2 ?? t.done] : null;
+  const cornerMark = () => haloed(mark[0], Math.round(size * 0.6), mark[1], ring).absolute().right(-5).top(-3);
   if (!hop || !badge) return div().relative().size(size).flex_none().child(bot)
     .when(Boolean(badge), el => el.child(badge.absolute().right(-5).bottom(-4)))
-    .when(Boolean(mark), el => el.child(question()));
-  // The view's beat (hop: { n, up, go }, from hopTick) drives it, each step a native transition: across to the other
-  // side over one hop at an even pace while it rises (slowing) and falls (speeding up), so it traces a round arc. Every landing starts a fresh ripple ring there, spreading and
-  // fading, so ring and landing stay together however long it runs.
+    .when(Boolean(mark), el => el.child(cornerMark()));
+  // The view's beat (hopTick) drives it, each step a native transition: across to the other side over one hop at an
+  // even pace while it rises (slowing) and falls (speeding up), so it traces a round arc. Every landing starts a fresh
+  // ripple ring there, spreading and fading, so ring and landing stay together however long it runs.
   const to = hop.n % 2 ? 12 : 7, landed = hop.n % 2 ? 7 : 12;
   const ripple = () => {
     // A thin oval (ripple.svg, stretched to its size), spreading fast and slowing as it fades.
@@ -830,17 +831,19 @@ export default class Agents extends View {
     };
 
     const row = (a, i, subs = []) => {
-      // With the Health bar context bars the logo carries the status (agentPic): it hops in amber while working, and is
-      // green once finished until the agent is looked at. So the spinner and the check go, and on the rail its second
-      // line is always the health bar.
+      // With the Health bar context bars (Tree) the logo carries the status (agentPic): it hops in amber while working;
+      // a green check (finished, not yet looked at) or a red question mark (it needs you) sits above it. So the
+      // spinner, check and "Needs you" badge go, and on the rail its second line is always the health bar.
       const logoStatus = !classic() && healthBars() && Boolean(a.program?.icon);
       const hops = logoStatus && a.status === "working", finished = logoStatus && a.status === "done", asks = logoStatus && a.status === "blocked";
       // The badge's ring is the card's own shade, so it sits on the card: hovered, in front, or plain.
       const ring = this.hovered === a.address ? t.hover : a.focused ? t.selected : t.surface;
-      // The icons' color: the agent in front's amber, others gray; when the logo carries the status, white for the agent in
-      // front (its logo still amber while working, green when finished), gray for the rest.
+      // The icons' color: the agent in front's amber, others gray; when the logo carries the status, white for the agent
+      // in front (its logo still amber while it works or waits on you), gray for the rest.
       const iconColor = logoStatus ? (a.focused ? t.foreground : t.muted) : a.focused ? t.accent : t.muted;
-      const pic = classic() ? icon(a.program, 16, a.focused ? t.accent : t.muted) : agentPic(t, a.program, 16, iconColor, ring, false, hops && (this.hopping = true) ? this.hop : null, asks ? t.working : null, asks ? "ask" : finished ? "done" : null);
+      if (hops) this.hopping = true;
+      const pic = classic() ? icon(a.program, 16, a.focused ? t.accent : t.muted)
+        : agentPic(t, a.program, 16, iconColor, ring, false, hops ? this.hop : null, asks ? t.working : null, asks ? "ask" : finished ? "done" : null);
       // The name: white while it's working, finished, needs you or is in front, gray when idle; when the logo carries the
       // status, white only for the agent in front.
       const idle = logoStatus ? !a.focused : a.status === "idle" && !a.focused;
@@ -941,7 +944,7 @@ export default class Agents extends View {
             .when(subs.length > 0 || (a.status === "blocked" && !asks), el => el.child(div().w(0).h(18).flex_none())))
           .child(div().relative().w_full().text_size(11.5).child(div().w(0).overflow_hidden().child(" "))
             .child(h_flex().absolute().top(0).bottom(0).left(0).right(0).items_center().justify_center()
-              .child(this.status(t, healthBars() ? { ...a, status: "idle" } : a, true))));
+              .child(this.status(t, logoStatus ? { ...a, status: "idle" } : a, true))));
       }
       return card.px(8)
         .child(h_flex().w_full().gap(8).items_center()
