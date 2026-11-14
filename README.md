@@ -111,7 +111,7 @@ Optional:
   its virtual device says; storage is the virtual device's own. These are limits rather than
   reservations: cores are threads the system runs anywhere, and memory is taken as Android uses
   it (though memory Android has filled isn't given back until the emulator stops). The defaults
-  are in the Simulator mod's `emulator.json` (`src/harness-simulator/emulator.json` here); change them in `~/.config/herdr-app/harness.json`,
+  are in the Simulator mod's `emulator.json` (`src/harns-emulator/emulator.json` here); change them in `~/.config/herdr-app/harness.json`,
   which updates don't overwrite, as `{ "emulator": { "default": { "memory": 6144 }, "devices":
   { "harns_phone": { "cores": 6 } } } }` (`memory` in MB, `cores`, `gpu`; `devices` by a virtual
   device's name, for that one only). The panel title's tooltip shows what the session's emulator
@@ -158,7 +158,7 @@ are entries in `src/shared/gpus.js`, with a place for AMD, Intel and Apple.
   as `python3`, `python` or `py -3`, so it runs as installed on Windows, Linux and macOS. The
   stats and account probes are tested the way each platform runs them: PowerShell on Windows,
   Python on Linux and macOS.
-- `harness-files` is herdr's Files panel where Markdown and `.mmd` files open in a floating window as a readable
+- `markdown-files` is herdr's Files panel where Markdown and `.mmd` files open in a floating window as a readable
   document: images (beside the file or on its machine; web images show as links, never fetched) and
   mermaid blocks drawn by Pele (the same vendored copy as herdr-chat's). Preview and
   Source in its header switch views. To update Pele, change the pin in `package.json`, then run

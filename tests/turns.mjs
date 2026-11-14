@@ -1,4 +1,4 @@
-import { look, changedHosts, machinesChanged, hostOf, endedApps } from '../layouts/harns/mods/workspace-status-machine/turns.js';
+import { look, changedHosts, machinesChanged, hostOf, endedApps } from '../layouts/harns/mods/harns-status/turns.js';
 
 let failed = 0;
 const check = (name, got, want) => {

@@ -18,8 +18,8 @@ SHARED = SRC / 'shared'
 
 # Each share folder and the mods it ships.
 LISTINGS = {
-    'layouts/harns': ['harness-chrome', 'harness-tabs', 'harness-settings', 'harness-files', 'harness-simulator',
-                      'machine-agents', 'workspace-status-machine', 'herdr-chat'],
+    'layouts/harns': ['harns-chrome', 'harns-tabs', 'harns-settings', 'markdown-files', 'harns-emulator',
+                      'machine-sidebar', 'harns-status', 'herdr-chat'],
     'layouts/herdr-chat': ['herdr-chat'],
 }
 
@@ -98,7 +98,7 @@ def build_mod(name, dest):
     shutil.copytree(SRC / name, dest, ignore=SKIP)
     share_imports(dest)
     share_icons(name, dest)
-    if name == 'machine-agents':
+    if name == 'machine-sidebar':
         # It draws its machines' stats icons and rings from its own stats/ folder, and reads Claude's and Pi's context
         # with the relay's own Python (context-relay.py's collect()), embedded as text.
         shutil.copytree(SHARED / 'rings', dest / 'stats' / 'rings')

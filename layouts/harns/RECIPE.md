@@ -33,7 +33,7 @@ Left to right: a sidebar, then the work column. There's no system title bar.
     program's name) and its status; under it, in 11.5 px dim, a 14 × 3 px bar of its context window under the icon, as on the
     rail, then its folder (the session's, from the log herdr-chat found for it,
     shared `herdr-chat.paths`; else the pane's) and git branch. Sub-agents hang under their parent as a
-    tree (26 px rows; in Tree their bot has no antenna, `harness-chrome/bot-small.svg`). In Tree the program's logo sits
+    tree (26 px rows; in Tree their bot has no antenna, `harns-chrome/bot-small.svg`). In Tree the program's logo sits
     on the bot's corner on a halo of itself in the row's color (copies nudged 1 px each way), not a disc; a picture
     icon keeps the disc. Its terminals that aren't agents (a shell, a dev server, lazygit) follow its agents, a 28 px row
     each: the program's icon in the agents' icon column, the program running now and its folder; a click focuses it and
@@ -47,7 +47,7 @@ Left to right: a sidebar, then the work column. There's no system title bar.
     1 px lines, each agent's bot icon with its program's icon small at its corner. In both, machines can be dragged into
     an order by their bands (kept in the mod's localStorage, `machines.order`).
   - **Footer** (44 px): Settings (a gear, with an amber dot when an update is ready), Add machine (a server), and
-    harns's Settings (the logo, a 760 px dialog from `harness-settings`: General, Sidebar, Chat, Status bar, Simulator,
+    harns's Settings (the logo, a 760 px dialog from `harns-settings`: General, Sidebar, Chat, Status bar, Simulator,
     which write shared `harness.local-name`, `harness.sidebar`, `harness.context-bar`, `herdr-chat.chat`, `herdr-chat.animation`,
     `harness.status`, `harness.quota.claude`, `harness.quota.codex`, `harness.commands-hint` and `harness.simulator`).
     A choice between options (the sidebar's style, its context bars) is a row of picture cards, as Herdr's settings
@@ -77,9 +77,9 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
   rail the mark sits on the row's second line, under the icon.
   With the Health bar (Tree), the program logo carries the status instead: working, it hops in amber from side to side
   over the bot in a round arc (even pace across, easing up and down), an amber ripple ring spreading where it lands
-  (`harness-chrome/ripple.svg`, an oval stretched as it grows). The sidebar drives it, one beat per half hop, each step
+  (`harns-chrome/ripple.svg`, an oval stretched as it grows). The sidebar drives it, one beat per half hop, each step
   a native transition and a fresh ring each landing, so ring and landing never drift apart. Above the logo, on its own
-  halo: the green check (done, until it's looked at) or a red question mark (`harness-chrome/question.svg`, blocked; the
+  halo: the green check (done, until it's looked at) or a red question mark (`harns-chrome/question.svg`, blocked; the
   logo stays amber). So there's no spinner, check or "Needs you" badge; on the rail every agent's second line is its
   context bar; names and icons are gray but for the agent in front's, white.
   Tabs show the same spinner, or a dot for blocked and done.
@@ -98,7 +98,7 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
   A card that changes place slides there (280 ms, ease-out), and the ones it passes slide too.
   Alt+Down and Alt+Up (`agent.next`, `agent.prev`) walk the agents in the list's order: Pinned, then
   each machine top to bottom. Alt+Shift+Down and Alt+Shift+Up jump to the next or previous machine's top
-  agent, coming round past the last (`machine-agents.next-machine`, `.prev-machine`). Alt+Left and Alt+Right show
+  agent, coming round past the last (`machine-sidebar.next-machine`, `.prev-machine`). Alt+Left and Alt+Right show
   the agent's Chat or Terminal (`layout.select` on the `chat-view` stack; herdr-chat follows). These keys are
   `layouts/harns.keys.json`; the installer adds each to keys.json's `layout:harns` section unless that keystroke is
   bound there already, and keeps the old file as `keys.json.before-install-<time>` when it changes. Without a
@@ -169,18 +169,18 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
   `work-body` row [`chat-view` stack of `chat-panel` and `terminal-panel`, hidden
   `panel` column with a `panel-body` stack of `files`, `changes` and `simulator`], `status` block].
 - **Mods:**
-  - `harness-chrome`: the brand bar, or the footer with props `{footer: true}`. Folds
+  - `harns-chrome`: the brand bar, or the footer with props `{footer: true}`. Folds
     the sidebar with `layout.resize` and opens the shipped `picker` and `machine-add`.
-  - `machine-agents`: the agents list, its machine cards and context bars. Calls `setAgentOrder`, `pane.focus` and
+  - `machine-sidebar`: the agents list, its machine cards and context bars. Calls `setAgentOrder`, `pane.focus` and
     `terminal.peek`. Opened as a popup with props `{ newMenu: true, machine }` it is a machine's + menu instead
     (`new-menu.js`, from `knownAgents({on})`), and with `{ loginBar }` the bar for logging in to a machine. Its ring
     row (`machine-metrics.js`), probes, icons and rings (`stats/`) are built in from the repository's `src/shared`.
-  - `harness-tabs`: the tab bar; uses the shipped `new-menu` and `menu`.
-  - `harness-simulator`: the Simulator panel. herdr draws with DirectComposition, which covers
+  - `harns-tabs`: the tab bar; uses the shipped `new-menu` and `menu`.
+  - `harns-emulator`: the Simulator panel. herdr draws with DirectComposition, which covers
     child windows, so `harns-dock` (built once from `dock.cs` with Windows' own `csc.exe` into
-    `cache/harness-simulator/`) makes each emulator's window a borderless popup owned by
+    `cache/harns-emulator/`) makes each emulator's window a borderless popup owned by
     herdr's, just above it. The mod writes the screen area, as gaps from the window's
-    bottom-right corner, to `cache/harness-simulator/dock-state.txt` only when it changes; the
+    bottom-right corner, to `cache/harns-emulator/dock-state.txt` only when it changes; the
     helper follows herdr's window through WinEvent hooks and, after a click or key press in
     herdr, asks `herdr-app status` whether an overlay is open. Nothing runs per frame. The
     state also names the emulator to show and every other one, which it keeps hidden.
@@ -195,7 +195,7 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
     never tiles beside herdr or takes its maximized place; the shown one is brought onto herdr's workspace over the
     panel, checked against where it really is every 100 ms through Hyprland's socket, and hidden while herdr's own
     socket says an overlay is open. `quit` turns the rule off and gives the windows back.
-  - `workspace-status-machine`: the status bar. It also collects the stats: a built copy of the shared machine code
+  - `harns-status`: the status bar. It also collects the stats: a built copy of the shared machine code
     (`machine-data.js`) publishes shared `machine.stats`, `machine.usage` and `machine.local-label`.
   - `herdr-chat` ([its own listing](../herdr-chat/RECIPE.md) too): the chat panel and the pane header with the toggle. The chat
     block passes it `backdrop: true`: an empty chat (a new session's welcome, or no agent in
@@ -210,9 +210,9 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
   turns end: this computer's directly (no process, as the relays write them), another
   machine's with `scripts/context-relay.py`'s collect() there; and Codex's logs (a small
   Python read of each one's newest `token_count`), else their footers with `hc read`.
-- **Art:** `harness-logo-fade` and `harness-logo-bob` (WebP, SVG sources) in `harness-chrome`; monochrome SVG icons
+- **Art:** `harness-logo-fade` and `harness-logo-bob` (WebP, SVG sources) in `harns-chrome`; monochrome SVG icons
   (Lucide, and harns's own: the bots, ripple, question mark, padded spinner) in each mod's `icons/`, from the
-  repository's one set in `src/shared/icons`; the stats icons and rings in `machine-agents/stats`; system icons in `machine-agents/os` (Simple Icons, CC0; see its
+  repository's one set in `src/shared/icons`; the stats icons and rings in `machine-sidebar/stats`; system icons in `machine-sidebar/os` (Simple Icons, CC0; see its
   SOURCES.md), a generated spinner, Windows
   window buttons among the icons, program icons in `brand-assets/` and `programs.json`.
 
@@ -269,13 +269,16 @@ connection).
   shared `machine.*` values.
 
 The installer writes only in the Herdr home, apart from the relays (see the README for the
-files they add or change), and removes the mods older versions added that harns no longer has (`machine-stats`,
-`machine-metrics`, `machine-new-menu`, `harness-pane`).
+files they add or change). Over an older install it carries the renamed mods' saved state (`data/<name>`) and the
+keys bound to their commands to the new names (`machine-agents` is `machine-sidebar`, `workspace-status-machine` is
+`harns-status`, `harness-files` is `markdown-files`, `harness-simulator` is `harns-emulator`, and the other `harness-*`
+are `harns-*`), then removes the old copies, the mods harns no longer has (`machine-stats`, `machine-metrics`,
+`machine-new-menu`, `harness-pane`) and the caches only they wrote.
 
 **Notes for building it:**
 
 - herdr's `fs.writeFile` writes binary data as an empty file while reporting success (text is
-  written whole), and its `Buffer` encodes bytes to base64 as an empty string. `harness-files`
+  written whole), and its `Buffer` encodes bytes to base64 as an empty string. `markdown-files`
   saves images for `image()` by checking each copy reads back whole and, when it doesn't,
   writing it as base64 text (its own `toBase64` in `bytes.js`) for PowerShell, else Python 3
   or `base64`, to decode beside it.
@@ -286,7 +289,7 @@ files they add or change), and removes the mods older versions added that harns 
     `machine-metrics.js` and `machine-data.js`;
   - the icons it loads from its own `icons/` (`mods/<mod>/icons/<name>.svg`): those it names, each choice where it picks
     one, and the whole set where it builds a name it doesn't spell out;
-  - for `machine-agents`, the stats icons and rings (`stats/`) and `context-relay.py` as `context-probe.js`.
+  - for `machine-sidebar`, the stats icons and rings (`stats/`) and `context-relay.py` as `context-probe.js`.
   Edit `src/` and run it; `npm test` stops while a built copy is stale, then tests the built mods, and checks that no
   mod names a picture it doesn't have or one in another of these mods.
 - The chat and the toggle need herdr-chat; without it those blocks show errors. It's one of this folder's mods, and the
@@ -306,15 +309,15 @@ files they add or change), and removes the mods older versions added that harns 
 - The installer is `scripts/install.py`; `install.sh` runs it with the first Python 3 that
   starts (on Windows, `python3` can be the Store placeholder), so install logic belongs in
   `install.py`.
-- `harness-files` replaces herdr's `files` block (same block id, so its clicks survive). It is
+- `markdown-files` replaces herdr's `files` block (same block id, so its clicks survive). It is
   herdr's Files plus a Markdown view, and `vendor/pele` comes from `npm run vendor:pele`. Don't
   edit the vendored copy. With props `{ file }` it is a viewer for that one file. Clicking a
   Markdown or `.mmd` file in the tree opens it as that viewer in a floating window (`openOverlay`
-  `kind: "window"`, key `harness-files-doc`: one at a time, reopened where it was dropped), headed
+  `kind: "window"`, key `markdown-files-doc`: one at a time, reopened where it was dropped), headed
   by the file's name with Preview/Source and ×; the panel stays on its folder. Other files preview
   in the panel, with ← back.
 - Sizes are read from the `sidebar` node's width: below 160 px every sidebar mod draws
-  its rail. `machine-agents` draws the rail from the same rows as the open list, each in its open box with
+  its rail. `machine-sidebar` draws the rail from the same rows as the open list, each in its open box with
   its icon alone and centred, so every row stays level as the sidebar folds, in either style: a machine's header icon as
   open (Tree: server or laptop; Classic: its system's, with its CPU ring for the rings row), sub-agents and terminals
   included, and a machine without agents a mark in its 26 px (a dash; a spinner while connecting; a cross offline).

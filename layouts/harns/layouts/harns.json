@@ -14,7 +14,7 @@
                                               "id":  "brand",
                                               "type":  "block",
                                               "content":  {
-                                                              "mod":  "harness-chrome"
+                                                              "mod":  "harns-chrome"
                                                           },
                                               "size":  {
                                                            "px":  46
@@ -29,7 +29,7 @@
                                                                    "id":  "agents",
                                                                    "type":  "block",
                                                                    "content":  {
-                                                                                   "mod":  "machine-agents"
+                                                                                   "mod":  "machine-sidebar"
                                                                                },
                                                                    "size":  {
                                                                                 "weight":  1
@@ -46,7 +46,7 @@
                                               "id":  "sidebar-footer",
                                               "type":  "block",
                                               "content":  {
-                                                              "mod":  "harness-chrome",
+                                                              "mod":  "harns-chrome",
                                                               "props":  {
                                                                             "footer":  true
                                                                         }
@@ -76,7 +76,7 @@
                                               "id":  "tabs",
                                               "type":  "block",
                                               "content":  {
-                                                              "mod":  "harness-tabs"
+                                                              "mod":  "harns-tabs"
                                                           },
                                               "size":  {
                                                            "px":  42
@@ -146,7 +146,7 @@
                                                                                                              "id":  "files",
                                                                                                              "type":  "block",
                                                                                                              "content":  {
-                                                                                                                             "mod":  "harness-files"
+                                                                                                                             "mod":  "markdown-files"
                                                                                                                          }
                                                                                                          },
                                                                                                          {
@@ -160,7 +160,7 @@
                                                                                                              "id":  "simulator",
                                                                                                              "type":  "block",
                                                                                                              "content":  {
-                                                                                                                             "mod":  "harness-simulator"
+                                                                                                                             "mod":  "harns-emulator"
                                                                                                                          }
                                                                                                          }
                                                                                                      ],
@@ -182,7 +182,7 @@
                                               "id":  "status",
                                               "type":  "block",
                                               "content":  {
-                                                              "mod":  "workspace-status-machine"
+                                                              "mod":  "harns-status"
                                                           },
                                               "size":  {
                                                            "px":  42

@@ -13,11 +13,51 @@ class RetireTests(unittest.TestCase):
     def test_retired_mods_go_and_the_rest_stay(self):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
-            for name in ('machine-stats', 'harness-pane', 'machine-agents', 'mine'):
+            for name in ('machine-stats', 'harness-pane', 'machine-sidebar', 'mine'):
                 (home / 'mods' / name).mkdir(parents=True)
             self.assertEqual(sorted(install.retire(home)), ['harness-pane', 'machine-stats'])
-            self.assertEqual(sorted(p.name for p in (home / 'mods').iterdir()), ['machine-agents', 'mine'])
+            self.assertEqual(sorted(p.name for p in (home / 'mods').iterdir()), ['machine-sidebar', 'mine'])
             self.assertEqual(install.retire(home), [])
+
+    def test_a_renamed_mods_old_copy_and_its_caches_go(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / 'mods' / 'machine-agents').mkdir(parents=True)
+            (home / 'cache' / 'herdr-chat' / 'diagrams').mkdir(parents=True)
+            (home / 'cache' / 'herdr-chat' / 'sent').mkdir(parents=True)
+            self.assertEqual(install.retire(home), ['machine-agents'])
+            self.assertEqual(sorted(p.name for p in (home / 'cache' / 'herdr-chat').iterdir()), ['sent'])
+
+
+class CarryOverTests(unittest.TestCase):
+    def test_saved_state_and_keys_follow_a_renamed_mod(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / 'data' / 'machine-agents').mkdir(parents=True)
+            (home / 'data' / 'machine-agents' / 'pins').write_text('["t1"]')
+            (home / 'keys.json').write_text(json.dumps({
+                'global': {'ctrl-t': 'tab.new'},
+                'layout:harns': {'alt-shift-down': 'machine-agents.next-machine', 'alt-right': {'action': 'layout.select', 'args': {}}}}))
+            moved, rebound = install.carry_over(home, home / 'keys.backup.json')
+            self.assertEqual(moved, ['machine-agents -> machine-sidebar'])
+            self.assertEqual((home / 'data' / 'machine-sidebar' / 'pins').read_text(), '["t1"]')
+            self.assertEqual(rebound, ['machine-agents.next-machine'])
+            keys = json.loads((home / 'keys.json').read_text())
+            self.assertEqual(keys['layout:harns']['alt-shift-down'], 'machine-sidebar.next-machine')
+            self.assertEqual(keys['layout:harns']['alt-right']['action'], 'layout.select')
+            self.assertEqual(keys['global'], {'ctrl-t': 'tab.new'})
+            self.assertTrue((home / 'keys.backup.json').exists())
+            self.assertEqual(install.carry_over(home, home / 'second.json'), ([], []))
+            self.assertFalse((home / 'second.json').exists())
+
+    def test_the_new_name_keeps_its_own_state(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            for name, pins in (('machine-agents', 'old'), ('machine-sidebar', 'new')):
+                (home / 'data' / name).mkdir(parents=True)
+                (home / 'data' / name / 'pins').write_text(pins)
+            self.assertEqual(install.carry_over(home, home / 'backup.json'), ([], []))
+            self.assertEqual((home / 'data' / 'machine-sidebar' / 'pins').read_text(), 'new')
 
 
 class MergeKeysTests(unittest.TestCase):
@@ -33,7 +73,7 @@ class MergeKeysTests(unittest.TestCase):
             self.assertNotIn('alt-left', added)
             self.assertEqual(data['layout:harns']['alt-left'], 'mine')
             self.assertEqual(data['layout:harns']['alt-right']['args']['child'], 'terminal-panel')
-            self.assertEqual(data['layout:harns']['alt-shift-down'], 'machine-agents.next-machine')
+            self.assertEqual(data['layout:harns']['alt-shift-down'], 'machine-sidebar.next-machine')
             self.assertEqual(data['global'], {'alt-left': 'pane.go:left'})
             self.assertTrue((root / 'backup.json').exists())
 

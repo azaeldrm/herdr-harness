@@ -12,7 +12,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const pkg = join(root, "node_modules", "pele");
 const esm = join(pkg, "dist", "esm");
 // Both mods that draw mermaid carry the same copy: the Files panel and the chat.
-const OUTS = ["harness-files", "herdr-chat"].map(mod => join(root, "src", mod, "vendor", "pele"));
+const OUTS = ["markdown-files", "herdr-chat"].map(mod => join(root, "src", mod, "vendor", "pele"));
 const check = process.argv.includes("--check");
 
 const pinned = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).devDependencies.pele;
