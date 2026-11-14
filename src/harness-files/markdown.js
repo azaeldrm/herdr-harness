@@ -27,7 +27,7 @@ function codeBox(id, label, source, t) {
       .child(div().flex_1().text_size(11.5).text_color(t.muted).child(label))
       .when(copied, el => el.child(div().text_size(11.5).text_color(t.muted).child("Copied")))
       .child(div().id(`${id}-copy`).flex_none().cursor_pointer().on_click(copy)
-        .child(svg(`mods/harness-files/${copied ? "check" : "copy"}.svg`).size(14).flex_none().text_color(t.muted))))
+        .child(svg(`mods/harness-files/icons/${copied ? "check" : "copy"}.svg`).size(14).flex_none().text_color(t.muted))))
     .child(v_flex().px(12).py(8).font_family(settings().font_family).text_size(12.5).text_color(t.foreground)
       .children(lines.map((l, k) => div().id(`${id}-l${k}`).w_full().min_h(18).child(shown(l)))));
 }

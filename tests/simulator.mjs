@@ -7,7 +7,7 @@ import { tmpdir } from "os";
 import { pathToFileURL, fileURLToPath } from "url";
 
 // The mod is copied beside stub packages for gpui-kit, gpui-base and herdr, then imported.
-const modDir = fileURLToPath(new URL("../src/harness-simulator", import.meta.url));
+const modDir = fileURLToPath(new URL("../layouts/harns/mods/harness-simulator", import.meta.url));
 const work = mkdtempSync(join(tmpdir(), "harns-simulator-test-"));
 const pkg = (name, src) => {
   mkdirSync(join(work, "node_modules", name), { recursive: true });

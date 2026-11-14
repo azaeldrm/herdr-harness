@@ -1,4 +1,4 @@
-import { hash } from "./hash.js";
+import { hash } from "../hash.js";
 
 export const KINDS = {
   shell:  { icon: "terminal",    label: "Ran",     one: "command",  many: "commands" },

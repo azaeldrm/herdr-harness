@@ -1,13 +1,14 @@
 import { View, div, svg } from "gpui-kit";
 import { h_flex, v_flex, InputState, Input } from "gpui-base";
 import { theme, shared, setShared, window, props, closeOverlay, layout, run } from "herdr";
+import { find } from "./layout.js";
 
 const SECTIONS = [
-  { id: "general", title: "General", icon: "mods/harness-chrome/laptop.svg" },
-  { id: "sidebar", title: "Sidebar", icon: "mods/harness-chrome/sidebar.svg" },
-  { id: "chat", title: "Chat", icon: "mods/harness-chrome/message.svg" },
-  { id: "status", title: "Status bar", icon: "mods/harness-chrome/panel-bottom.svg" },
-  { id: "simulator", title: "Simulator", icon: "mods/harness-simulator/smartphone.svg" },
+  { id: "general", title: "General", icon: "mods/harness-settings/icons/laptop.svg" },
+  { id: "sidebar", title: "Sidebar", icon: "mods/harness-settings/icons/sidebar.svg" },
+  { id: "chat", title: "Chat", icon: "mods/harness-settings/icons/message.svg" },
+  { id: "status", title: "Status bar", icon: "mods/harness-settings/icons/panel-bottom.svg" },
+  { id: "simulator", title: "Simulator", icon: "mods/harness-settings/icons/smartphone.svg" },
 ];
 
 const STYLES = [
@@ -20,15 +21,6 @@ const CONTEXT_BARS = [
   { id: "health", name: "Health bar", about: "Drains as a session uses its context window: green, amber below 45% left, red below 25%." },
 ];
 
-function find(node, id) {
-  // The layout node with this id, if the layout has one.
-  if (node?.id === id) return node;
-  for (const child of node?.children ?? []) {
-    const found = find(child, id);
-    if (found) return found;
-  }
-  return null;
-}
 
 export default class HarnessSettings extends View {
   init(_props, cx) {
@@ -92,7 +84,7 @@ export default class HarnessSettings extends View {
         .child(preview))
       .child(h_flex().px(2).gap(6).items_center()
         .child(div().text_size(13.5).text_color(chosen ? t.foreground : t.muted).child(name))
-        .when(chosen, el => el.child(svg("mods/harness-chrome/check.svg").size(13).text_color(t.accent))));
+        .when(chosen, el => el.child(svg("mods/harness-settings/icons/check.svg").size(13).text_color(t.accent))));
   }
 
   cards(t, options, chosen, preview, choose) {

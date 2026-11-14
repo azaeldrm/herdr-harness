@@ -9,6 +9,7 @@ import { osOf } from "./os.js";
 import { look, changedHosts, machinesChanged } from "./turns.js";
 import { agentFolder } from "./sessions.js";
 import { NewMenu } from "./new-menu.js";
+import { find, narrow } from "./layout.js";
 
 const localMachineLabel = () => shared("machine.local-label") ?? "This computer";
 const statsFor = (machine, t) => machineMetrics(machine, false, t);
@@ -35,14 +36,6 @@ const underMachine = (t, rows, last, elbowAt) => {
     .children(treeLines(t, 17, elbowAt, !last, i === 0, 0, 10)));
 };
 
-function find(node, id) {
-  if (node?.id === id) return node;
-  for (const child of node?.children ?? []) {
-    const found = find(child, id);
-    if (found) return found;
-  }
-  return null;
-}
 
 const healthBars = () => shared("harness.context-bar") === "health";
 const contextText = used => healthBars() ? `${Math.round(100 - used)}% left` : `${Math.round(used)}% used`;
@@ -56,7 +49,6 @@ function contextBar(t, used, width, height = 3) {
     .when(share > 0, el => el.child(div().h_full().rounded_full().w(Math.max(2, Math.round(width * share / 100))).bg(color)));
 }
 
-const narrow = () => (find(layout(), "sidebar")?.size?.px ?? Infinity) < 160;
 
 const clean = (s) => (s ?? "").replace(/^[^\p{L}\p{N}]+/u, "").trim();
 
@@ -136,13 +128,13 @@ function agentPic(t, p, size, color, ring, sub = false, hop = false, tint = null
   // The agent icon (a sub-agent's: the same bot without its antenna), with its program's icon small at its bottom right
   // on a halo of the row's color (badgeOf). `hop` (working; the view's beat, { n, up, go }): that logo hops in amber
   // from side to side over the bot, its halo masking the bot as it passes, a ripple spreading where it lands.
-  const bot = svg(`mods/harness-chrome/${sub ? "bot-small" : "bot"}.svg`).size(size).flex_none().text_color(color);
+  const bot = svg(`mods/machine-agents/icons/${sub ? "bot-small" : "bot"}.svg`).size(size).flex_none().text_color(color);
   // The logo's color: amber while it hops (working), else `tint` (amber, still: it needs you mid-task), else the row's.
   const badge = badgeOf(p, Math.round(size * 0.65), hop ? t.working : tint ?? color, ring);
   // `corner`: a mark on its own halo right above the logo (its column, right -5), as if the logo spoke: "ask" (it needs
   // you) a red question mark, the health bar's red; "done" (finished, not yet looked at) the green check.
-  const mark = corner === "ask" ? ["mods/harness-chrome/question.svg", "#d88179"]
-    : corner === "done" ? ["mods/machine-agents/circle-check.svg", t.ansi2 ?? t.done] : null;
+  const mark = corner === "ask" ? ["mods/machine-agents/icons/question.svg", "#d88179"]
+    : corner === "done" ? ["mods/machine-agents/icons/circle-check.svg", t.ansi2 ?? t.done] : null;
   const cornerMark = () => haloed(mark[0], Math.round(size * 0.6), mark[1], ring).absolute().right(-5).top(-3);
   if (!hop || !badge) return div().relative().size(size).flex_none().child(bot)
     .when(Boolean(badge), el => el.child(badge.absolute().right(-5).bottom(-4)))
@@ -154,7 +146,7 @@ function agentPic(t, p, size, color, ring, sub = false, hop = false, tint = null
   const ripple = () => {
     // A thin oval (ripple.svg, stretched to its size), spreading fast and slowing as it fades.
     const w = hop.go ? 16 : 5, h = hop.go ? 4 : 1.4, policy = { duration: 480, easing: "ease-out" };
-    return svg("mods/harness-chrome/ripple.svg").id(`ripple-${hop.n}`).absolute().left(landed + 6 - w / 2).top(GROUND - h / 2).w(w).h(h)
+    return svg("mods/machine-agents/icons/ripple.svg").id(`ripple-${hop.n}`).absolute().left(landed + 6 - w / 2).top(GROUND - h / 2).w(w).h(h)
       .text_color(t.working).opacity(hop.go ? 0 : 0.9)
       .transition("width", policy).transition("height", policy).transition("left", policy).transition("top", policy).transition("opacity", policy);
   };
@@ -248,7 +240,7 @@ export default class Agents extends View {
   machineIcon(machine) {
     // Its system's icon once known, else a drive (another machine) or a screen (this computer).
     const os = this.osIcons?.[machine?.name ?? ""];
-    return os ? `mods/machine-agents/os/${os}.svg` : `mods/harness-chrome/${machine?.name ? "hard-drive" : "monitor"}.svg`;
+    return os ? `mods/machine-agents/os/${os}.svg` : `mods/machine-agents/icons/${machine?.name ? "hard-drive" : "monitor"}.svg`;
   }
 
   hopTick(cx) {
@@ -264,7 +256,7 @@ export default class Agents extends View {
 
   headerIcon(machine) {
     // The icon a machine's header shows, open or on the rail: in Classic its system's, in Tree a server or this laptop.
-    return classic() ? this.machineIcon(machine) : `mods/harness-chrome/${machine?.name ? "server" : "laptop"}.svg`;
+    return classic() ? this.machineIcon(machine) : `mods/machine-agents/icons/${machine?.name ? "server" : "laptop"}.svg`;
   }
 
   noticeTurns(cx) {
@@ -455,7 +447,7 @@ export default class Agents extends View {
     const kids = this.tree(all, a.address);
     return v_flex().w(340).p(12).gap(8).rounded(10).border_1().border_color(t.border).bg(t.popover ?? t.raised).text_size(12).shadow_md()
       .child(h_flex().w_full().gap(10).items_center()
-        .child(icon(a.program, 26, t.muted) ?? svg("mods/harness-chrome/bot.svg").size(26).flex_none().text_color(t.muted))
+        .child(icon(a.program, 26, t.muted) ?? svg("mods/machine-agents/icons/bot.svg").size(26).flex_none().text_color(t.muted))
         .child(v_flex().flex_1().min_w(0).gap(1)
           .child(div().text_size(13.5).font_semibold().text_color(t.foreground).whitespace_normal().child(name || a.program?.name || a.address))
           .child(div().text_size(11).text_color(t.dim).truncate().child([a.program?.name, machine].filter(Boolean).join(" \u00b7 ")))))
@@ -646,7 +638,7 @@ export default class Agents extends View {
       .border_b(1)
       .border_color(t.border)
       .text_size(12)
-      .child(svg("mods/harness-chrome/hard-drive.svg").size(13).flex_none().text_color(t.dim))
+      .child(svg("mods/machine-agents/icons/hard-drive.svg").size(13).flex_none().text_color(t.dim))
       .child(div().flex_none().text_color(t.foreground).font_medium().child(`Log in to ${name}`))
       .child(div().flex_1().min_w(0).truncate().text_color(t.dim).child("Type the password or code below; this closes when it connects."))
       .child(div()
@@ -664,7 +656,7 @@ export default class Agents extends View {
           run("terminal.kill", { terminal });
           closeOverlay(props().overlay);
         })
-        .child(svg("mods/harness-chrome/x.svg").size(12)));
+        .child(svg("mods/machine-agents/icons/x.svg").size(12)));
   }
 
   peek(addr) {
@@ -734,7 +726,7 @@ export default class Agents extends View {
     const shown = focused()?.pane;
     return this.plainTerminals(machine).map((p) => {
       const on = p.pane === shown, name = p.program?.name || p.title || "shell", where = folderName(p.cwd);
-      const pic = icon(p.program, 16, on ? t.accent : t.muted) ?? svg("mods/harness-chrome/terminal.svg").size(15).flex_none().text_color(on ? t.accent : t.muted);
+      const pic = icon(p.program, 16, on ? t.accent : t.muted) ?? svg("mods/machine-agents/icons/terminal.svg").size(15).flex_none().text_color(on ? t.accent : t.muted);
       const open = () => {
         run("pane.focus", { pane: p.pane });
         if (find(layout(), "chat-view")) run("layout.select", { stack: "chat-view", child: "terminal-panel" });
@@ -762,9 +754,9 @@ export default class Agents extends View {
     const state = { working: "Working", done: "Finished · not yet viewed", blocked: "Needs you" }[a.status];
     const tip = a.address ? `Context: ${known ? contextText(percent) : "unavailable"}${state ? ` · ${state}` : ""}` : state;
     const mark = el => div().size(14).flex_none().flex().items_center().justify_center().when(Boolean(tip), d => d.tooltip(tip)).child(el);
-    // The spinner's picture has a clear margin (build-mods.py), so it draws at 15 px to show the same 12 px ring.
-    if (a.status === "working") return mark(svg("mods/machine-agents/context-rings/spinner.svg").size(15).flex_none().text_color(t.working).spin(900));
-    if (a.status === "done") return mark(svg("mods/machine-agents/circle-check.svg").size(13).flex_none().text_color(t.ansi2 ?? t.done));
+    // The spinner's picture has a clear margin (scripts/package.py), so it draws at 15 px to show the same 12 px ring.
+    if (a.status === "working") return mark(svg("mods/machine-agents/icons/spinner.svg").size(15).flex_none().text_color(t.working).spin(900));
+    if (a.status === "done") return mark(svg("mods/machine-agents/icons/circle-check.svg").size(13).flex_none().text_color(t.ansi2 ?? t.done));
     if (a.status === "blocked" && compact) return mark(div().size(14).rounded(4).bg(t.blocked + "26").text_size(10.5).font_bold().text_color(t.blocked).flex().items_center().justify_center().child("!"));
     if (a.status === "blocked") return div().flex_none().px(6).h(18).rounded(5).bg(t.blocked + "26").text_size(10.5).font_semibold().text_color(t.blocked).flex().items_center()
       .when(Boolean(tip), d => d.tooltip(tip)).child("Needs you");
@@ -822,7 +814,7 @@ export default class Agents extends View {
           open ? this.folded.add(a.address) : this.folded.delete(a.address);
           cx.notify();
         })
-        .child(svg(`mods/harness-chrome/chevron-${open ? "down" : "right"}.svg`).size(11).flex_none())
+        .child(svg(`mods/machine-agents/icons/chevron-${open ? "down" : "right"}.svg`).size(11).flex_none())
         .when(!open, (el) => el.child(String(subs.length)));
     };
 
@@ -871,7 +863,7 @@ export default class Agents extends View {
           this.hovered = null;
           cx.notify();
         })
-        .child(svg(`mods/harness-chrome/${isPinned ? "pin-off" : "pin"}.svg`).size(12));
+        .child(svg(`mods/machine-agents/icons/${isPinned ? "pin-off" : "pin"}.svg`).size(12));
       const full = isPinned;
       const name = label(a) || a.space_name || "";
       // Line 2: where it works (folder · branch, and its space where the list doesn't group by it); context used as a small bar.
@@ -969,7 +961,7 @@ export default class Agents extends View {
             // The folder whole; the branch (and space) take what's left, cut short at their end.
             .children(where.map(([text, glyph]) => h_flex().gap(4).items_center()
               .when(glyph === "folder", el => el.flex_none()).when(glyph !== "folder", el => el.min_w(0))
-              .child(svg(`mods/harness-chrome/${glyph}.svg`).size(11).flex_none().text_color(t.dim))
+              .child(svg(`mods/machine-agents/icons/${glyph}.svg`).size(11).flex_none().text_color(t.dim))
               .child(div().min_w(0).truncate().child(text)))))
           .when(!pic && Boolean(bar), el => el.child(bar)));
     };
@@ -995,7 +987,7 @@ export default class Agents extends View {
       // tooltip: a dash for no agents, a spinner while connecting, a cross when offline or waiting for a login.
       const ready = g.machine?.layout === "ready", loading = !ready && g.machine?.layout === "loading";
       const text = ready ? "No agents" : this.hosts[g.machine?.name]?.state === "needs_login" ? "Needs login" : loading ? "Connecting…" : "Offline";
-      const mark = ready ? svg("mods/harness-chrome/minus.svg").size(12) : loading ? svg("mods/harness-chrome/spinner.svg").size(13).spin(900) : svg("mods/harness-chrome/x.svg").size(11);
+      const mark = ready ? svg("mods/machine-agents/icons/minus.svg").size(12) : loading ? svg("mods/machine-agents/icons/spinner.svg").size(13).spin(900) : svg("mods/machine-agents/icons/x.svg").size(11);
       return div().id(`empty-${g.id}`).h(26).flex_none().flex().items_center().text_size(11).text_color(t.dim)
         .when(collapsed, el => el.justify_center().tooltip(text).child(mark.flex_none().text_color(t.dim)))
         .when(!collapsed, el => el.pl(29).child(text));
@@ -1011,7 +1003,7 @@ export default class Agents extends View {
         return h_flex().id(g.id).h(30).pt(isMachine ? 6 : 8).flex_none().items_center().justify_center().cursor_pointer()
           .tooltip(g.label)
           .when(!isMachine, el => el.on_click((_e, cx) => { open ? this.folded.add(g.id) : this.folded.delete(g.id); cx.notify(); }))
-          .child(svg(isMachine ? this.headerIcon(g.machine) : "mods/harness-chrome/pin.svg").size(isMachine ? 14 : 12).flex_none().text_color(isMachine ? t.muted : t.dim));
+          .child(svg(isMachine ? this.headerIcon(g.machine) : "mods/machine-agents/icons/pin.svg").size(isMachine ? 14 : 12).flex_none().text_color(isMachine ? t.muted : t.dim));
       }
       return h_flex()
         .id(g.id)
@@ -1037,7 +1029,7 @@ export default class Agents extends View {
         .when(isMachine && classic(), (el) => {
           const n = this.plainTerminals(g.machine).length, count = (id, glyph, value, tip) => h_flex().id(id).gap(3).items_center()
             .font_medium().text_size(11).text_color(t.dim).tooltip(tip)
-            .child(svg(`mods/harness-chrome/${glyph}.svg`).size(12).flex_none()).child(String(value));
+            .child(svg(`mods/machine-agents/icons/${glyph}.svg`).size(12).flex_none()).child(String(value));
           return el.child(h_flex().gap(8).items_center()
             .child(count(`agents-${g.id}`, "bot", g.members.length, `${g.members.length} agent${g.members.length === 1 ? "" : "s"}`))
             .when(n > 0, (row) => row.child(count(`terms-${g.id}`, "terminal", n, `${n} terminal${n === 1 ? "" : "s"} besides the agents`))));
@@ -1046,11 +1038,11 @@ export default class Agents extends View {
         .child(div().flex_1())
         .when(!open, (el) => el
           .when(Boolean(top) && top !== "idle", (el) => el.child(this.status(t, { status: top }, true)))
-          .when(!isMachine, el => el.child(svg("mods/harness-chrome/chevron-right.svg").size(11).flex_none().text_color(t.dim))))
+          .when(!isMachine, el => el.child(svg("mods/machine-agents/icons/chevron-right.svg").size(11).flex_none().text_color(t.dim))))
         // A machine always shows its fold arrow, left of the +: down while its agents show, right when folded.
         .when(isMachine, el => el.child(div().size(14).flex_none().flex().items_center().justify_center()
           .tooltip(open ? "Fold this machine's agents" : "Show this machine's agents")
-          .child(svg(`mods/harness-chrome/chevron-${open ? "down" : "right"}.svg`).size(12).flex_none().text_color(t.dim))))
+          .child(svg(`mods/machine-agents/icons/chevron-${open ? "down" : "right"}.svg`).size(12).flex_none().text_color(t.dim))))
         .when(isMachine && g.machine?.layout === "ready", el => el.child(div()
           .id(`add-${g.id}`)
           .size(14)
@@ -1071,7 +1063,7 @@ export default class Agents extends View {
             cx.notify();
             openOverlay({ mod: "machine-agents", kind: "popup", width: 280, height: 500, props: { newMenu: true, machine: g.machine.name } });
           })
-          .child(svg("mods/harness-chrome/plus.svg").size(12))))
+          .child(svg("mods/machine-agents/icons/plus.svg").size(12))))
         .when(isMachine && Boolean(g.machine?.name) && g.machine?.layout !== "ready", el => {
           const name = g.machine.name;
           const busy = Boolean(this.retrying[name]?.busy);
@@ -1091,7 +1083,7 @@ export default class Agents extends View {
               cx.stop_propagation();
               this.retry(name, cx);
             })
-            .child(svg(`mods/harness-chrome/${busy ? "spinner" : "rotate-cw"}.svg`).size(busy ? 15 : 12)));
+            .child(svg(`mods/machine-agents/icons/${busy ? "spinner" : "rotate-cw"}.svg`).size(busy ? 15 : 12)));
         });
     };
     // Open or on the rail, the same rows: the rail draws each in its box, its icon alone, so every row stays level as the

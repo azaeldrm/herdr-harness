@@ -100,7 +100,7 @@ export class NewMenu {
         .when(!this.loading && !this.failed && this.agents.length === 0, el => el.child(div().px(9).py(6).text_color(t.dim).child("No launchable agents found"))))
       .child(div().h(1).mx(4).my(5).bg(t.border))
       .child(this.row("space", div().w(14).child("+"), "New space", () => { closeOverlay(props().overlay); run("space.new", { machine: targeted ? this.machine : undefined }); }, shortcut("space.new"), !targeted))
-      .child(this.row("worktree", svg("mods/harness-chrome/branch.svg").size(14), "New worktree…", () => openOverlay({ mod: "worktree", kind: "dialog", width: 460, height: 280, props: { space: space?.id, folder: panes().find(p => p.focused)?.cwd, action: "new" } }), "", Boolean(space) && !targeted))
-      .child(this.row("worktree-open", svg("mods/harness-chrome/branch.svg").size(14), "Open worktree…", () => openOverlay({ mod: "worktree", kind: "dialog", width: 560, height: 480, props: { space: space?.id, folder: panes().find(p => p.focused)?.cwd, action: "open" } }), "", Boolean(space) && !targeted));
+      .child(this.row("worktree", svg("mods/machine-agents/icons/branch.svg").size(14), "New worktree…", () => openOverlay({ mod: "worktree", kind: "dialog", width: 460, height: 280, props: { space: space?.id, folder: panes().find(p => p.focused)?.cwd, action: "new" } }), "", Boolean(space) && !targeted))
+      .child(this.row("worktree-open", svg("mods/machine-agents/icons/branch.svg").size(14), "Open worktree…", () => openOverlay({ mod: "worktree", kind: "dialog", width: 560, height: 480, props: { space: space?.id, folder: panes().find(p => p.focused)?.cwd, action: "open" } }), "", Boolean(space) && !targeted));
   }
 }

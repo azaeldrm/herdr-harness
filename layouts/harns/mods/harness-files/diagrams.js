@@ -1,4 +1,6 @@
-// Mermaid diagrams drawn with Pele, the same renderer and theming as herdr-chat's diagrams.js.
+// Mermaid diagrams drawn with Pele, themed from Herdr's theme: the Files panel's and the chat's (each mod carries its
+// own copy of this file and of vendor/pele, built in by scripts/package.py). A diagram is drawn once to an SVG in
+// cache/diagrams, keyed by its code and colors, so both mods reuse what either drew.
 import { appHome } from "herdr";
 import * as fs from "fs/promises";
 import { register, render } from "./vendor/pele/core.js";
@@ -12,10 +14,11 @@ import pie from "./vendor/pele/diagrams/pie.js";
 import mindmap from "./vendor/pele/diagrams/mindmap.js";
 import timeline from "./vendor/pele/diagrams/timeline.js";
 import gitGraph from "./vendor/pele/diagrams/gitGraph.js";
+import { hash } from "./hash.js";
 
 register(flowchart, sequence, state, klass, er, gantt, pie, mindmap, timeline, gitGraph);
 
-const DIR = "cache/harness-files/diagrams";
+const DIR = "cache/diagrams";
 const KEPT = 200;
 const entries = new Map();
 const queue = [];
@@ -25,11 +28,9 @@ const MONO = "'JetBrains Mono', 'Noto Sans Mono', 'Liberation Mono', 'DejaVu San
 
 const onWindows = () => appHome().includes("\\");
 
-export function hash(text) {
-  // A short text digest (djb2), for keys and file names.
-  let h = 5381;
-  for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
-  return (h >>> 0).toString(36);
+export function diagramDir() {
+  // Where drawn diagrams are kept, as this system writes paths.
+  return onWindows() ? `${appHome()}\\cache\\diagrams` : `${appHome()}/${DIR}`;
 }
 
 function colorsOf(t) {
@@ -76,7 +77,7 @@ export async function renderQueuedDiagrams(budgetMs = 40) {
     catch (err) { Object.assign(e, { state: "failed", error: String(err?.message ?? err).split("\n")[0] }); done.push([e, null]); }
   }
   if (!done.length) return 0;
-  const dir = onWindows() ? `${appHome()}\\cache\\harness-files\\diagrams` : `${appHome()}/${DIR}`;
+  const dir = diagramDir();
   await fs.mkdir(dir, { recursive: true }).catch(() => {});
   await Promise.all(done.filter(([, r]) => r).map(async ([e, r]) => {
     try {

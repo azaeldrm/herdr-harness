@@ -1,9 +1,9 @@
 import { exec, appHome, readTextFile } from "herdr";
 import * as fs from "fs/promises";
+import { hash } from "./hash.js";
 
 const quote = s => `'${String(s).replace(/'/g, "''")}'`;
 const ps = script => exec("powershell", ["-NoProfile", "-NonInteractive", "-Command", script]);
-const hash = text => { let h = 5381; for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0; return (h >>> 0).toString(36); };
 
 export async function windowsHost() {
   // The Simulator's Windows side: the Android SDK under %LOCALAPPDATA% (or ANDROID_HOME), programs started hidden

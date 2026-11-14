@@ -7,7 +7,8 @@ import { keyRows, splitCode, withCopyRows, stepRows, stepText, withoutRetracted 
 import { runsWith, switchCommand, tokens } from "./model/runs-with.js";
 import { row, TOOL_BUTTON, TOOL_GAP } from "./ui/rows.js";
 import { COLUMN, programIcon, paneButtons, statusBadge, viewToggle, clock, icon } from "./ui/primitives.js";
-import { diagramFor, renderQueuedDiagrams, hasQueuedDiagrams, splitDiagrams, copyDiagramImage } from "./diagrams.js";
+import { diagramFor, renderQueuedDiagrams, hasQueuedDiagrams } from "./diagrams.js";
+import { splitDiagrams, copyDiagramImage } from "./diagram-copy.js";
 import { canMirror } from "./harnesses/index.js";
 import { isHeader, terminalHeader } from "./header.js";
 import { designPx, zoomProbe } from "./measure.js";

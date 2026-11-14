@@ -49,7 +49,7 @@ export default class WorkspaceStatus extends MachineData {
         .child(svg(name === 'Claude' ? 'icons/claude.svg' : 'brand-assets/chatgpt-knot.svg').size(14).flex_none().text_color(t.muted))
         .child(weekly ? bar('7d', 'sevenDay', 0.5) : bar('5h', 'fiveHour', 1));
     };
-    const label = (icon, text) => h_flex().gap(6).items_center().child(svg(`mods/harness-chrome/${icon}.svg`).size(13)).child(text);
+    const label = (icon, text) => h_flex().gap(6).items_center().child(svg(`mods/workspace-status-machine/icons/${icon}.svg`).size(13)).child(text);
     return h_flex().size_full().px(14).gap(16).items_center().bg(t.surface).text_size(11.8).text_color(t.muted)
       .child(label(space?.machine ? "hard-drive" : "monitor", space?.machine ?? shared("machine.local-label") ?? "This computer"))
       .when(Boolean(space?.branch), el => el.child(label("branch", space.branch)))

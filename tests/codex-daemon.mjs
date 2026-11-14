@@ -1,4 +1,4 @@
-import { codexThread, daemonChoices, daemonReply } from "../src/herdr-chat/harnesses/codex-daemon.js";
+import { codexThread, daemonChoices, daemonReply } from "../layouts/herdr-chat/mods/herdr-chat/harnesses/codex-daemon.js";
 
 let failed = false;
 const check = (name, got, want) => {

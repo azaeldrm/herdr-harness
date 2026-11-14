@@ -11,7 +11,7 @@ const python = [['python3'], ['python'], ['py', '-3']].find(([exe, ...args]) =>
   spawnSync(exe, [...args, '-c', 'import sys; sys.exit(sys.version_info[0] != 3)']).status === 0);
 
 // The Node tests: the machine sidebar and status bar's (usage ... os-icons), then the chat's.
-const node = ['usage', 'turns', 'probes', 'snapshots', 'markdown', 'simulator', 'os-icons',
+const node = ['usage', 'turns', 'probes', 'snapshots', 'markdown', 'simulator', 'os-icons', 'assets',
   'sweep', 'backdrop', 'diagrams', 'copy', 'caret', 'retracted', 'runs-with', 'codex-daemon', 'previews', 'skills', 'sessions',
   'read-cue', 'fold', 'measure', 'drafts', 'focus', 'prompts', 'harnesses', 'structure'];
 // The chat's Python tests run as scripts (the unittest ones are the test_*.py files).
@@ -27,8 +27,13 @@ const steps = [
   ...(python ? scripts.filter(t => here(`${t}.py`)).map(t => [`tests/${t}.py`, python[0], [...python.slice(1), `tests/${t}.py`]]) : []),
   ...node.filter(t => here(`${t}.mjs`)).map(t => [`tests/${t}.mjs`, process.execPath, [`tests/${t}.mjs`]]),
   ['Pele matches its pin', process.execPath, ['scripts/vendor-pele.mjs', '--check']],
-  python ? ['Share folders match src/', python[0], [...python.slice(1), 'scripts/package.py', '--check']] : null,
 ].filter(Boolean);
+
+// The tests load the listings' built mods (what ships), so those must be built from the current src/ first.
+if (python && spawnSync(python[0], [...python.slice(1), 'scripts/package.py', '--check'], { cwd: repo, stdio: 'inherit' }).status !== 0) {
+  console.log('\nThe tests run on the built listings: run python scripts/package.py, then npm test again.');
+  process.exit(1);
+}
 
 const failed = python ? [] : ['Python tests (Python 3 not found as python3, python or py -3)'];
 if (process.platform === 'win32') console.log(`Skipped on Windows (Linux and macOS only): ${[...unixOnly].map(t => `tests/${t}`).join(', ')}`);

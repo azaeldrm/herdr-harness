@@ -210,10 +210,11 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
   turns end: this computer's directly (no process, as the relays write them), another
   machine's with `scripts/context-relay.py`'s collect() there; and Codex's logs (a small
   Python read of each one's newest `token_count`), else their footers with `hc read`.
-- **Art:** `harness-logo-fade` and `harness-logo-bob` (WebP, SVG sources), monochrome SVG
-  icons in `harness-chrome` and `machine-agents/stats`, system icons in `machine-agents/os` (Simple Icons, CC0; see its
+- **Art:** `harness-logo-fade` and `harness-logo-bob` (WebP, SVG sources) in `harness-chrome`; monochrome SVG icons
+  (Lucide, and harns's own: the bots, ripple, question mark, padded spinner) in each mod's `icons/`, from the
+  repository's one set in `src/shared/icons`; the stats icons and rings in `machine-agents/stats`; system icons in `machine-agents/os` (Simple Icons, CC0; see its
   SOURCES.md), a generated spinner, Windows
-  window icons in `harness-tabs`, program icons in `brand-assets/` and `programs.json`.
+  window buttons among the icons, program icons in `brand-assets/` and `programs.json`.
 
 ## Simulator setup
 
@@ -278,11 +279,16 @@ files they add or change), and removes the mods older versions added that harns 
   saves images for `image()` by checking each copy reads back whole and, when it doesn't,
   writing it as base64 text (its own `toBase64` in `bytes.js`) for PowerShell, else Python 3
   or `base64`, to decode beside it.
-- Each herdr mod imports from its own folder, so this folder's `mods/` is built: the repository keeps each mod's
-  source in `src/`, and `scripts/package.py` copies it here with the shared code it needs from `src/shared` (the
-  machine probes, `details.js`, `machine-metrics.js`, the stats icons and rings into `machine-agents`; the probes and
-  `machine-data.js` into `workspace-status-machine`; `context-relay.py` into `context-probe.js`). Edit `src/` and run it;
-  `npm test` fails while a built copy is stale.
+- Each herdr mod reads only its own folder, so this folder's `mods/` is built: the repository keeps each mod's source
+  in `src/`, and `scripts/package.py` copies it here with what it uses from `src/shared`, so every mod works alone:
+  - code it imports but doesn't have (`./layout.js`, `../hash.js`), then what that imports: the layout helpers, the
+    hash, the mermaid engine (`diagrams.js`, Files' and the chat's), the machine probes, `details.js`,
+    `machine-metrics.js` and `machine-data.js`;
+  - the icons it loads from its own `icons/` (`mods/<mod>/icons/<name>.svg`): those it names, each choice where it picks
+    one, and the whole set where it builds a name it doesn't spell out;
+  - for `machine-agents`, the stats icons and rings (`stats/`) and `context-relay.py` as `context-probe.js`.
+  Edit `src/` and run it; `npm test` stops while a built copy is stale, then tests the built mods, and checks that no
+  mod names a picture it doesn't have or one in another of these mods.
 - The chat and the toggle need herdr-chat; without it those blocks show errors. It's one of this folder's mods, and the
   installer installs it with the rest (`--no-chat` leaves an installed copy as it is).
 - Claude's and Pi's context readings come from the relays (`scripts/install-context.py`) on each

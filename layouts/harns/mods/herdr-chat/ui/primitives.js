@@ -30,7 +30,7 @@ export function paneButtons(t, pane, zoomed, prefix) {
 
 export function statusBadge(t, status) {
   // An agent's status in a header: a spinner while working, "Needs you" when blocked, a dot when done.
-  if (status === "working") return svg(`${ICONS}/spinner.svg`).size(12).flex_none().text_color(t.working).spin(900);
+  if (status === "working") return svg(`${ICONS}/spinner-tight.svg`).size(12).flex_none().text_color(t.working).spin(900);
   if (status === "blocked") return div().flex_none().px(6).h(18).flex().items_center().rounded(5).bg(t.blocked + "26")
     .text_size(10.5).font_semibold().text_color(t.blocked).child("Needs you");
   if (status === "done") return div().size(7).flex_none().rounded(4).bg(t.done);

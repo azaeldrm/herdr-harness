@@ -1,4 +1,4 @@
-import { fromProbe, servicesOf, current } from '../src/shared/usage.js';
+import { fromProbe, servicesOf, current } from '../layouts/harns/mods/workspace-status-machine/usage.js';
 
 let failed = 0;
 const check = (name, got, want) => {

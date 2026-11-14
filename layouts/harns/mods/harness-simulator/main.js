@@ -22,6 +22,7 @@ import { exec, hc, appHome, readTextFile, layout, settings, window, theme, space
 import * as fs from "fs/promises";
 import { windowsHost } from "./windows.js";
 import { linuxHost } from "./linux.js";
+import { find } from "./layout.js";
 
 const BLOCK = "simulator";
 const PAD = 12;           // around the screen area, in the mod's px (herdr zooms them)
@@ -30,14 +31,6 @@ const POLL = 4000;        // how often the emulators are read (ms)
 const SHARE_PORT = 15555; // the first port tried on another machine for an emulator's adb
 const CHECK = 30000;      // how often shared emulators are checked on their machines (ms)
 
-function find(node, id) {
-  if (node?.id === id) return node;
-  for (const child of node?.children ?? []) {
-    const found = find(child, id);
-    if (found) return found;
-  }
-  return null;
-}
 
 function insets(node, id) {
   // How far block `id` sits from the window's right and bottom edges, in layout px, from the
@@ -541,7 +534,7 @@ export default class Simulator extends View {
         // event's cx isn't usable after an await).
         .on_click((_e, cx) => { cx.spawn(async acx => { await action(acx); acx.notify(); }); }))
       .when(Boolean(opts.disabled), el => el.opacity(0.5))
-      .child(svg(`mods/harness-simulator/${icon}.svg`).size(13)).when(Boolean(label), el => el.child(label));
+      .child(svg(`mods/harness-simulator/icons/${icon}.svg`).size(13)).when(Boolean(label), el => el.child(label));
 
     const header = h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
       .child(div().id("sim-title").font_semibold().child("Simulator").when(Boolean(avd), el => el.tooltip(`This session's: ${this.label(avd)}${this.specText(avd) ? ` (${this.specText(avd)})` : ""}`)))
@@ -549,11 +542,11 @@ export default class Simulator extends View {
       .when(Boolean(share && (!share.pending || share.error)), el => el.child(h_flex().id("sim-share").h(22).px(6).gap(4).flex_none().items_center().rounded(5)
         .border_1().border_color(t.border).text_size(11).text_color(share.error ? t.blocked : t.muted)
         .tooltip(share.error ? `Not shared with ${share.machine}: ${share.error}` : `Shared with ${share.machine}: this session's agents reach it with adb (${share.serial} there)`)
-        .child(svg("mods/harness-simulator/share.svg").size(11)).child(share.machine)
+        .child(svg("mods/harness-simulator/icons/share.svg").size(11)).child(share.machine)
         .child(div().id("sim-unshare").cursor_pointer().text_color(t.dim).hover(st => st.text_color(t.foreground))
           .on_mouse_down("left", swallow)
           .on_click((_e, cx) => { this.declined.add(live); cx.spawn(async acx => { await this.unshare(live); await this.writeMaps(); acx.notify(); }); })
-          .child(svg("mods/harness-simulator/x.svg").size(10)))))
+          .child(svg("mods/harness-simulator/icons/x.svg").size(10)))))
       .when(Boolean(live), el => el
         .when(Boolean(this.host?.docks), el => el.child(this.mode === "dock"
           ? button("sim-pop", "pop-out", null, cx => this.setMode("window", cx)).tooltip("Open in their own windows")

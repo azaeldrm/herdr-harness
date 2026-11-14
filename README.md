@@ -145,7 +145,8 @@ are entries in `src/shared/gpus.js`, with a place for AMD, Intel and Apple.
 
 ## Working on it
 
-- Each mod's source is in `src/` (code several mods share is in `src/shared/`). The listings' `mods/` folders are built
+- Each mod's source is in `src/`; what several share (code, and the one icon set in `src/shared/icons/`) is in
+  `src/shared/`, and a mod gets what it imports or names when it's built. The listings' `mods/` folders are built
   from it by `scripts/package.py`: don't edit them. Edit `src/`, then run the installer (`--no-switch --no-relays`
   while developing): it builds the listings and copies harns's into `~/.config/herdr-app`.
 - A listing is a folder under `layouts/` (or, for a mod on its own, `mods/`) with its `RECIPE.md`, `preview.png` and

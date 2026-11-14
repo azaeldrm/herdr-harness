@@ -6,7 +6,8 @@ import { v_flex, h_flex, Editor, EditorState } from "gpui-base";
 import { spaces, panes, focused, exec, readTextFile, watchFolder, theme, settings, window, appHome, props, openOverlay, closeOverlay } from "herdr";
 import { MARKDOWN, MERMAID, parse, resolveLink } from "./parse.js";
 import { document } from "./markdown.js";
-import { hasQueuedDiagrams, renderQueuedDiagrams, hash } from "./diagrams.js";
+import { hasQueuedDiagrams, renderQueuedDiagrams } from "./diagrams.js";
+import { hash } from "./hash.js";
 import { forgetImages, takeChanged } from "./images.js";
 
 function location() {
@@ -227,8 +228,8 @@ export default class Files extends View {
       const path = prefix ? `${prefix}/${entry.name}` : entry.name, open = this.folders.has(path), mark = this.marks[`${this.root}/${path}`];
       out.push(h_flex().id(`file-${path}`).h(28).flex_none().pl(8 + depth * 18).pr(8).gap(7).items_center().rounded(7).cursor_pointer().hover(s => s.bg(t.hover))
         .on_click((_e, cx) => entry.dir ? this.toggle(path, cx) : readable(path) ? this.openDoc(path) : this.show(path, cx))
-        .child(entry.dir ? svg(`mods/harness-files/chevron-${open ? "down" : "right"}.svg`).size(12).flex_none().text_color(t.dim) : div().w(12).flex_none())
-        .child(svg(`mods/harness-files/${entry.dir ? "folder" : "file"}.svg`).size(14).flex_none().text_color(t.muted))
+        .child(entry.dir ? svg(`mods/harness-files/icons/chevron-${open ? "down" : "right"}.svg`).size(12).flex_none().text_color(t.dim) : div().w(12).flex_none())
+        .child(svg(`mods/harness-files/icons/${entry.dir ? "folder" : "file"}.svg`).size(14).flex_none().text_color(t.muted))
         .child(div().flex_1().min_w(0).truncate().child(entry.name))
         .when(Boolean(mark), el => el.child(div().text_size(11).text_color(mark === "A" ? t.ansi2 : mark === "D" || mark === "U" ? t.ansi1 : t.blocked).child(mark))));
       if (entry.dir && open) this.rows(path, depth + 1, out, t);
@@ -270,7 +271,7 @@ export default class Files extends View {
         .when(this.window, el => el.child(div().id("files-close").size(22).flex_none().flex().items_center().justify_center().rounded(5)
           .cursor_pointer().text_color(t.muted).hover(s => s.bg(t.hover).text_color(t.foreground))
           .on_mouse_down("left", (_e, cx) => cx.stop_propagation())
-          .on_click(() => closeOverlay(props().overlay)).child(svg("mods/harness-chrome/x.svg").size(12)))))
+          .on_click(() => closeOverlay(props().overlay)).child(svg("mods/harness-files/icons/x.svg").size(12)))))
       .when(!this.file, el => el.child(v_flex().id("files-tree").flex_1().min_h(0).overflow_y_scrollbar().p(6).children(this.rows("", 0, [], t))
         .when(Boolean(this.error) || !this.entries.get("")?.length, el => el.child(div().p(8).text_size(12).text_color(t.dim).child(this.error || (this.loading ? "Loading files…" : this.root ? "No files" : "No folder"))))
         .when(this.limited, el => el.child(div().p(8).text_size(11).text_color(t.dim).child("File list limited to 500 entries per folder and 5,000 total")))))

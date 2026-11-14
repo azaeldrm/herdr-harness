@@ -5,7 +5,7 @@ import { theme, props, appHome, openOverlay, closeOverlay } from "herdr";
 import { icon } from "../ui/primitives.js";
 import { designPx, zoomProbe } from "../measure.js";
 import { onWindows } from "../platform.js";
-import { copyDiagramImage } from "../diagrams.js";
+import { copyDiagramImage } from "../diagram-copy.js";
 
 const STEP = 1.25, MIN = 0.25, MAX = 4, FIT_MAX = 2;
 // Herdr rasterizes an SVG drawn by image() once, at its own width/height × 2, and keeps that bitmap for the path, so a

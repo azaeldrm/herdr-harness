@@ -127,8 +127,8 @@ the terminal itself belongs to the layout. The same mod runs twice: as the chat
 | `terminal.js`, `platform.js` | the target agent and its screen; Windows and Unix differences |
 | `images.js`, `prepare-image.sh` / `.ps1` | image previews: where they go, shrinking, the clipboard |
 | `input-box.py`, `send.ps1` | the agent's own input box through `hc attach` (Linux and macOS); sending on Windows |
-| `diagrams.js`, `vendor/pele/` | mermaid through [Pele](https://github.com/obsidianmd/pele), pinned in `package.json` and copied into `vendor/` |
-| `icons/` | the mod's SVG icons |
+| `diagrams.js`, `diagram-copy.js`, `vendor/pele/` | mermaid through [Pele](https://github.com/obsidianmd/pele), pinned in `package.json` and copied into `vendor/`: the engine (shared with harns's Files panel, drawing into `cache/diagrams`), and the chat's splitting of a message around its diagrams and copying one as a picture |
+| `icons/` | the mod's SVG icons (from the repository's one set, `src/shared/icons`) |
 
 ## Watch out
 
@@ -147,7 +147,7 @@ the terminal itself belongs to the layout. The same mod runs twice: as the chat
   `~/.pi/agent/sessions`, OpenCode's database), their skill folders, terminal screens, and the
   process list, to find which session runs in each terminal;
 - types into terminals and stops a working agent with its own stop key;
-- writes image copies and drawn diagrams under `cache/herdr-chat/` in the Herdr home, and deletes
+- writes image copies under `cache/herdr-chat/` and drawn diagrams under `cache/diagrams/` in the Herdr home, and deletes
   its own files there after a day (delete that folder along with the mod to remove everything);
 - sets the app's `accent` and `selection` colours to a dimmed accent while it runs, so selected
   text stays visible in herdr's text boxes. Theme files stay as they are;

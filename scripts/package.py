@@ -6,6 +6,7 @@ and an agent installing a listing read it from the repository).
     python scripts/package.py --check   fail if any is stale (npm test runs this)
 """
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -25,12 +26,7 @@ LISTINGS = {
 # Editor files and caches never ship.
 SKIP = shutil.ignore_patterns('__pycache__', '*.pyc', 'gpui-kit.d.ts', 'jsconfig.json', '*.error')
 
-# The working spinner (an idle agent shows its context as a bar). It has a clear margin (a 30-unit square around the
-# 24): herdr turns it as a picture, and a turned square's corners reach past it, where they'd pick up whatever icon lies
-# next to it.
-SPINNER = ('<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="-3 -3 30 30" fill="none" '
-           'stroke="currentColor" stroke-width="3.2" stroke-linecap="round">'
-           '<circle cx="12" cy="12" r="9.4" stroke-opacity="0.24"/><path d="M12 2.6a9.4 9.4 0 0 1 9.4 9.4"/></svg>\n')
+ICONS = SHARED / 'icons'
 
 
 def write(path, text):
@@ -38,26 +34,78 @@ def write(path, text):
     path.write_text(text, encoding='utf-8', newline='\n')
 
 
+IMPORT = re.compile(r"""(?:from\s*|import\s*\(\s*)["'](\.{1,2}/[^"']+\.js)["']""")
+
+
+def share_imports(dest):
+    """Copies in each file of src/shared that the mod imports but doesn't have (`./layout.js`, `../hash.js` from a
+    subfolder: always the mod's own top folder), then what those import, until nothing is missing. So a mod carries
+    exactly the shared code it uses."""
+    while True:
+        wanted = set()
+        for js in dest.rglob('*.js'):
+            if 'vendor' in js.relative_to(dest).parts:
+                continue
+            for rel in IMPORT.findall(js.read_text(encoding='utf-8')):
+                target = (js.parent / rel).resolve()
+                if not target.exists() and target.parent == dest.resolve() and (SHARED / target.name).is_file():
+                    wanted.add(target.name)
+        if not wanted:
+            return
+        for name in wanted:
+            shutil.copy2(SHARED / name, dest / name)
+
+
+def icon_names(template, available):
+    """The icons an icon path's name can be: `pin` is itself; `chevron-${open ? "down" : "right"}` is each choice its
+    expression spells out; a name an expression gives without spelling it (`${glyph}`) can be any icon."""
+    choices = ['']
+    for literal, expression in re.findall(r'([^$]*)(?:\$\{([^}]*)\})?', template):
+        options = re.findall(r'"([a-z0-9-]*)"|\'([a-z0-9-]*)\'', expression) if expression else []
+        if expression and not options:
+            pattern = re.compile(''.join('.+' if part.startswith('${') else re.escape(part)
+                                         for part in re.split(r'(\$\{[^}]*\})', template)) + '$')
+            return {icon for icon in available if pattern.match(icon)}
+        options = [a or b for a, b in options] if options else ['']
+        choices = [c + literal + o for c in choices for o in options]
+    return set(choices)
+
+
+def share_icons(name, dest):
+    """Copies into the mod's icons/ the icons of src/shared/icons it loads (`mods/<name>/icons/<icon>.svg`): the ones
+    it names, each choice where it picks one as it runs, and all of them where it builds a name it doesn't spell out
+    (`${glyph}`, or the folder kept in a constant and named elsewhere)."""
+    folder = f'mods/{name}/icons'
+    available = {p.stem for p in ICONS.glob('*.svg')}
+    named = set()
+    for js in dest.rglob('*.js'):
+        if 'vendor' in js.relative_to(dest).parts:
+            continue
+        text = js.read_text(encoding='utf-8')
+        for at in re.finditer(re.escape(folder), text):
+            path = re.match(r'/((?:[^\n`"\'$]|\$\{[^}]*\})+?)\.svg', text[at.end():])
+            named |= icon_names(path.group(1), available) if path else available
+    icons = [ICONS / f'{icon}.svg' for icon in sorted(named)]
+    for icon in icons:
+        if not icon.is_file():
+            sys.exit(f'{name} loads {folder}/{icon.name}, which src/shared/icons does not have')
+        (dest / 'icons').mkdir(exist_ok=True)
+        shutil.copy2(icon, dest / 'icons' / icon.name)
+
+
 def build_mod(name, dest):
-    """One mod as it ships: its src/ folder, then what it takes from src/shared."""
+    """One mod as it ships: its src/ folder, the shared code it imports, and what it takes from src/shared besides."""
     shutil.copytree(SRC / name, dest, ignore=SKIP)
+    share_imports(dest)
+    share_icons(name, dest)
     if name == 'machine-agents':
-        # The agents list reads machines itself (its rings, hover card and what it runs on), and draws their icons and
-        # rings from its own stats/ folder.
-        shutil.copy2(SHARED / 'machine-metrics.js', dest / 'machine-metrics.js')
-        for file in ('turns.js', 'details.js', 'platforms.js', 'probes.js', 'gpus.js'):
-            shutil.copy2(SHARED / file, dest / file)
+        # It draws its machines' stats icons and rings from its own stats/ folder, and reads Claude's and Pi's context
+        # with the relay's own Python (context-relay.py's collect()), embedded as text.
         shutil.copytree(SHARED / 'rings', dest / 'stats' / 'rings')
         for icon in ('cpu.svg', 'ram.svg', 'gpu.svg', 'board.svg', 'usage.svg'):
             shutil.copy2(SHARED / icon, dest / 'stats' / icon)
         probe = (REPO / 'scripts' / 'context-relay.py').read_text(encoding='utf-8')
         write(dest / 'context-probe.js', 'export const contextProbe = ' + json.dumps(probe) + ';\n')
-        write(dest / 'context-rings' / 'spinner.svg', SPINNER)
-    if name == 'workspace-status-machine':
-        # The status bar reads the focused machine's figures and the accounts' quota with the same probes.
-        shutil.copy2(SHARED / 'main.js', dest / 'machine-data.js')
-        for file in ('probes.js', 'platforms.js', 'gpus.js', 'usage.js', 'turns.js'):
-            shutil.copy2(SHARED / file, dest / file)
 
 
 def build(into):

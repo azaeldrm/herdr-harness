@@ -3,7 +3,9 @@ import { join } from "path";
 import { stage } from "./stage.mjs";
 
 const staged = stage();
-const { splitDiagrams, diagramFor, renderQueuedDiagrams, hasQueuedDiagrams, bake, framedSvg } = await staged.load("diagrams.js");
+// The engine (diagrams.js, shared with the Files panel) and the chat's own splitting and copying (diagram-copy.js).
+const { diagramFor, renderQueuedDiagrams, hasQueuedDiagrams, bake } = await staged.load("diagrams.js");
+const { splitDiagrams, framedSvg } = await staged.load("diagram-copy.js");
 let failed = 0;
 const check = (ok, what, detail = "") => { console.log(`${ok ? "PASS" : "FAIL"} ${what}${ok ? "" : "  " + detail}`); if (!ok) failed++; };
 const theme = { background: "#101215", foreground: "#dededb", muted: "#9a9fa2", surface: "#16191d", raised: "#1c2025", border: "#2a2f35", accent: "#e0a030" };

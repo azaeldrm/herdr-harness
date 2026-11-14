@@ -1,21 +1,13 @@
 import { View, div, image, svg } from "gpui-kit";
 import { h_flex, v_flex } from "gpui-base";
 import { theme, run, props, window, shared, setShared, updates, layout, agents, openOverlay } from "herdr";
+import { find, narrow } from "./layout.js";
 
 const logoSrc = () => agents().some(a => a.status === "working")
   ? "mods/harness-chrome/harness-logo-fade.webp"
   : "mods/harness-chrome/harness-logo-bob.webp";
 
-function find(node, id) {
-  if (node?.id === id) return node;
-  for (const child of node?.children ?? []) {
-    const found = find(child, id);
-    if (found) return found;
-  }
-  return null;
-}
 
-const narrow = () => (find(layout(), "sidebar")?.size?.px ?? Infinity) < 160;
 
 // The rail is twice the sidebar's icon axis (26 px in), so what it centres lines up with the open sidebar's icons; macOS
 // needs it wider for the traffic lights.
@@ -46,7 +38,7 @@ export default class WorkspaceChrome extends View {
       const size = collapsed ? 24 : 28;
       const icon = (id, name, tip, action, dot = false) => div().id(id).relative().size(size).flex_none().flex().items_center().justify_center()
         .rounded(7).text_color(t.muted).hover(s => s.bg(t.hover).text_color(t.foreground)).cursor_pointer().tooltip(tip)
-        .on_click(action).child(svg(`mods/harness-chrome/${name}.svg`).size(15))
+        .on_click(action).child(svg(`mods/harness-chrome/icons/${name}.svg`).size(15))
         .when(dot, el => el.child(div().absolute().top(3).right(3).size(6).rounded_full().bg(t.accent)));
       const ready = Boolean(updates().app.ready);
       const gear = icon("settings", "settings", ready ? "Settings · update ready" : "Settings", () => run("app.settings"), ready);
@@ -66,7 +58,7 @@ export default class WorkspaceChrome extends View {
         // The same 28 px button and logo as the rail's.
         .child(this.button("sidebar-collapse-logo", image(logoSrc()).size(28).rounded(5), toggleSidebar, 28, "Collapse sidebar"))
         .child(div().text_size(16).font_semibold().text_color(t.foreground).child("harns"))))
-      .when(!collapsed, el => el.child(this.button("search", svg("mods/harness-chrome/search.svg").size(15), () => run("mod.open", { name: "picker" }))))
-      .when(!collapsed, el => el.child(this.button("sidebar-toggle", svg("mods/harness-chrome/sidebar.svg").size(15), toggleSidebar)));
+      .when(!collapsed, el => el.child(this.button("search", svg("mods/harness-chrome/icons/search.svg").size(15), () => run("mod.open", { name: "picker" }))))
+      .when(!collapsed, el => el.child(this.button("sidebar-toggle", svg("mods/harness-chrome/icons/sidebar.svg").size(15), toggleSidebar)));
   }
 }

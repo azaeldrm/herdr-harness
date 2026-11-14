@@ -392,7 +392,7 @@ export class Composer {
           ? div().id("stop").size(32).flex_none().flex().items_center().justify_center().rounded(16)
             .bg(t.foreground).text_color(t.background).tooltip("Stop (Esc)")
             .when(!this.host.stopping, el => el.cursor_pointer().hover(s => s.opacity(0.85)).on_click((_e, cx) => this.host.stop(cx)))
-            .child(svg(`${ICONS}/stop.svg`).size(14))
+            .child(svg(`${ICONS}/stop-filled.svg`).size(14))
           : div().id("send").size(32).flex_none().flex().items_center().justify_center().rounded(16)
             .bg(ready ? t.accent : t.raised).text_color(ready ? t.accent_foreground : t.dim)
             .when(ready, el => el.cursor_pointer().hover(s => s.opacity(0.88)).on_click((_e, cx) => this.send(cx)))
