@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+  <!-- herdr-chat: an agent's conversation as a chat, its reply box at the bottom. -->
+  <rect width="320" height="200" fill="#0b0d0e"/>
+
+  <!-- tab bar -->
+  <rect x="12" y="8" width="26" height="3" rx="1.5" fill="#e8e9ea"/>
+  <rect x="8" y="15" width="34" height="1.6" fill="#e9aa35"/>
+  <rect x="50" y="8" width="20" height="3" rx="1.5" fill="#5c6166"/>
+  <rect x="78" y="8" width="20" height="3" rx="1.5" fill="#5c6166"/>
+
+  <!-- the conversation -->
+  <rect x="8.5" y="22.5" width="303" height="170" rx="6" fill="#0e1012" stroke="#25282b"/>
+  <rect x="18" y="31" width="52" height="3" rx="1.5" fill="#c8ccd0"/>
+  <rect x="254" y="28" width="48" height="9" rx="3" fill="#141719" stroke="#25282b" stroke-width="0.8"/>
+  <rect x="256" y="29.5" width="21" height="6" rx="2" fill="#2a2113"/>
+  <rect x="260" y="31.5" width="13" height="2" rx="1" fill="#e9aa35"/>
+  <rect x="282" y="31.5" width="16" height="2" rx="1" fill="#5c6166"/>
+  <path d="M9 43 H311" stroke="#25282b" stroke-width="1"/>
+
+  <!-- a reply -->
+  <g fill="#a9aeb3">
+    <rect x="70" y="55" width="170" height="3" rx="1.5"/>
+    <rect x="70" y="62" width="150" height="3" rx="1.5"/>
+    <rect x="70" y="69" width="164" height="3" rx="1.5"/>
+    <rect x="70" y="76" width="96" height="3" rx="1.5"/>
+  </g>
+  <!-- code in it -->
+  <rect x="70" y="86" width="180" height="22" rx="4" fill="#141719"/>
+  <g fill="#e9aa35"><rect x="78" y="92" width="22" height="2.6" rx="1.3"/></g>
+  <g fill="#80868b">
+    <rect x="104" y="92" width="60" height="2.6" rx="1.3"/>
+    <rect x="78" y="99" width="90" height="2.6" rx="1.3"/>
+  </g>
+  <!-- the person's message -->
+  <rect x="152" y="117" width="98" height="17" rx="6" fill="#141719"/>
+  <rect x="161" y="121.5" width="80" height="3" rx="1.5" fill="#c8ccd0"/>
+  <rect x="161" y="127.5" width="44" height="3" rx="1.5" fill="#c8ccd0"/>
+  <!-- working -->
+  <rect x="70" y="145" width="4" height="4" rx="1" fill="#e9aa35"/>
+  <rect x="78" y="145.5" width="44" height="3" rx="1.5" fill="#5c6166"/>
+
+  <!-- reply box -->
+  <rect x="66.5" y="157.5" width="188" height="20" rx="6" fill="#0b0d0e" stroke="#25282b"/>
+  <rect x="75" y="166" width="32" height="3" rx="1.5" fill="#5c6166"/>
+  <circle cx="245" cy="167.5" r="5.5" fill="#e8e9ea"/>
+  <rect x="70" y="182" width="30" height="2.4" rx="1.2" fill="#5c6166"/>
+  <rect x="228" y="182" width="22" height="2.4" rx="1.2" fill="#25282b"/>
+  <rect x="228" y="182" width="6" height="2.4" rx="1.2" fill="#e9aa35"/>
+</svg>

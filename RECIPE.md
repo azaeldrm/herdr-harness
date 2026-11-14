@@ -9,8 +9,8 @@ reaches.
 
 ## Install
 
-Ask your Herdr agent to add this layout, or copy `mods/herdr-chat/` and `layouts/herdr-chat.json`
-into `~/.config/herdr-app/` and switch to `herdr-chat` with `ctrl-shift-l`. Your own layout stays
+Ask your Herdr agent to add this layout, or copy `mods/herdr-chat/`, `layouts/herdr-chat.json` and its picture
+for Herdr's layout picker, `layouts/herdr-chat.svg`, into `~/.config/herdr-app/` and switch to `herdr-chat` with `ctrl-shift-l`. Your own layout stays
 as it was, one `ctrl-shift-l` away.
 
 Each machine with agents needs Python 3: `python3`, or `py -3` / `python` on Windows.

@@ -2,6 +2,7 @@
   "id": "root",
   "type": "row",
   "titlebar": "none",
+  "preview": "layouts/herdr-chat.svg",
   "traffic_lights": [
     12,
     16
