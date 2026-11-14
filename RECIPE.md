@@ -36,7 +36,7 @@ Left to right: a sidebar, then the work column. There's no system title bar.
     program's name) and its status; under it, in 11.5 px dim, a 14 × 3 px bar of its context window under the icon, as on the
     rail, then its folder (the session's, from the log herdr-chat found for it,
     shared `herdr-chat.paths`; else the pane's) and git branch. Sub-agents hang under their parent as a
-    tree (26 px rows; in Tree their bot has no antenna, `harness-chrome/bot-small.svg`). Its terminals that aren't agents (a shell, a dev server, lazygit) follow its agents, a 28 px row
+    tree (26 px rows; in Tree their bot has no antenna, `harness-chrome/bot-small.svg`). The program's logo sits on the bot's corner on a halo of itself in the row's color (copies nudged 1 px each way), not a disc. With the Health bar context bars, a working agent's logo (Tree) hops in amber from side to side over its bot in a round arc (even pace across, easing up and down), an amber ripple ring spreading where it lands (`harness-chrome/ripple.svg`, an oval stretched as it grows). At the bot's top-right corner, on its own halo: a finished agent's green check until it's looked at, or for one that needs you a red question mark (`harness-chrome/question.svg`) instead of the "Needs you" badge, its logo kept amber (still). As the icon carries those, none has a spinner, check or badge, on the rail every agent's second line is its health bar, and names and icons are gray but for the agent in front's, white (its logo still amber or green by its status). The sidebar drives it, one beat per half hop (each step a native transition, a fresh ring each landing), so ring and landing never drift apart. With Fill it stays still. Its terminals that aren't agents (a shell, a dev server, lazygit) follow its agents, a 28 px row
     each: the program's icon in the agents' icon column, the program running now and its folder; a click focuses it and
     shows the Terminal view; on the rail, just the icon, on the agents' axis, with the rest in its tooltip. The machine's
     name is followed by its counts, each with its icon: agents (a bot), and terminals (`>_`) when it has any.
@@ -50,7 +50,7 @@ Left to right: a sidebar, then the work column. There's no system title bar.
   - **Footer** (44 px): Settings (a gear, with an amber dot when an update is ready), Add machine (a server), and
     harns's Settings (the logo, a 760 px dialog from `harness-settings`: General, Sidebar, Chat, Status bar, Simulator,
     which write shared `harness.local-name`, `harness.sidebar`, `harness.context-bar`, `herdr-chat.chat`, `herdr-chat.animation`,
-    `harness.status`, `harness.quota.claude`, `harness.quota.codex`, `harness.commands-hint` and `harness.simulator`).
+    `harness.status`, `harness.quota.claude`, `harness.quota.codex`, `harness.commands-hint` and `harness.simulator`). A choice between options (the sidebar's style, its context bars) is a row of picture cards, as Herdr's settings show layouts: each a small live drawing of what it gives, the chosen one outlined in amber with a check, and what it does under them; on/off settings are switches.
 - **Tab bar** (42 px, `chrome` `#0b0d0e`, drags the window): the space's tabs as labels
   with the program icon, the active one underlined in amber (2 px) with a close button;
   then +, Files, Changes, Simulator (Windows and Linux), and the window buttons on Windows and Linux.
@@ -71,7 +71,7 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
   `ansi2`); idle shows nothing open (the card's bar under the icon shows its context) and, on the rail, the same
   14 × 3 px context bar. It fills with the share used (gray, amber above 75%, red `#d88179` above 90%), or, with
   shared `harness.context-bar` `health` (Settings → Sidebar → Context bar), drains like a health bar to the share left
-  (green, amber below 25% left, red below 10%); hovering it gives the percentage either way. On the
+  (green, amber below 45% left, red below 25%); hovering it gives the percentage either way. On the
   rail the mark sits on the row's second line, under the icon.
   Tabs show the same spinner, or a dot for blocked and done.
 - **Context readings:** Claude Code and Pi report through the relays (Watch out). Codex's
