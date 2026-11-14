@@ -24,12 +24,19 @@ for d in sorted(glob.glob('/sys/class/hwmon/hwmon*')):
         pick = next((labels[k] for k in ('Tctl', 'Tdie', 'Package id 0') if k in labels), d + '/temp1_input')
         if rd(pick): temp = int(rd(pick)) / 1000; break
 mem = {l.split(':')[0]: int(l.split()[1]) * 1024 for l in rd('/proc/meminfo').splitlines() if l.split()[1:2] and l.split()[1].isdigit()}
-disks = []
-for mount in ('/', '/home', '/srv'):
-    try:
-        if mount == '/' or os.path.ismount(mount):
-            u = shutil.disk_usage(mount); disks.append({'mount': mount, 'total': u.total, 'free': u.free})
-    except OSError: pass
+# Every drive mounted from a device (a second SSD at /srv/data, say), once each (a btrfs subvolume shares its
+# device), without boot, recovery and EFI partitions, or anything under 8 GB.
+disks, seen = [], set()
+for line in rd('/proc/mounts').splitlines():
+    dev, mount = (line.split() + ['', ''])[:2]
+    mount = mount.replace('\\\\040', ' ')
+    if not dev.startswith('/dev/') or dev.startswith(('/dev/loop', '/dev/zram')) or dev in seen: continue
+    if mount.startswith(('/boot', '/efi', '/recovery', '/snap')): continue
+    try: u = shutil.disk_usage(mount)
+    except OSError: continue
+    if u.total < 8 * 1024 ** 3: continue
+    seen.add(dev); disks.append({'mount': mount, 'total': u.total, 'free': u.free})
+disks.sort(key=lambda d: (d['mount'] != '/', d['mount']))
 try: gpus = subprocess.run(${JSON.stringify(NVIDIA)}, capture_output=True, text=True, timeout=3).stdout.strip().splitlines()
 except (OSError, subprocess.TimeoutExpired): gpus = []
 print(json.dumps({
