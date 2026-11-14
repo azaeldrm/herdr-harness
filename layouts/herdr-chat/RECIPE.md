@@ -9,7 +9,7 @@ reaches.
 
 ## Install
 
-Ask your Herdr agent to add this layout, or copy `mods/herdr-chat/`, `layouts/herdr-chat.json` and its picture
+Ask your Herdr agent to add this layout, or copy `mods/agent-chat/`, `layouts/herdr-chat.json` and its picture
 for Herdr's layout picker, `layouts/herdr-chat.svg`, into `~/.config/herdr-app/` and switch to `herdr-chat` with `ctrl-shift-l`. Your own layout stays
 as it was, one `ctrl-shift-l` away.
 
@@ -20,9 +20,9 @@ its pane look the mod as a header. The mod looks for these names:
 
 ```json
 { "id": "chat-view", "type": "stack", "active": "chat-panel", "children": [
-  { "id": "chat-panel", "type": "block", "content": { "mod": "herdr-chat", "props": { "role": "chat" } } },
+  { "id": "chat-panel", "type": "block", "content": { "mod": "agent-chat", "props": { "role": "chat" } } },
   { "id": "terminal-panel", "type": "block", "content": { "tab": "active", "pane": {
-      "header": { "content": { "mod": "herdr-chat" }, "height": 42, "position": "top", "reveal": "always" } } } }
+      "header": { "content": { "mod": "agent-chat" }, "height": 42, "position": "top", "reveal": "always" } } } }
 ] }
 ```
 
@@ -111,7 +111,7 @@ The swap is `layout.select { stack: "chat-view", child: "chat-panel" | "terminal
 the terminal itself belongs to the layout. The same mod runs twice: as the chat
 (`props.role: "chat"`) and as the terminal's pane header (it gets `{ pane, terminal }`).
 
-**Mod** `mods/herdr-chat/` (`mod.json` is `{"place":"none"}`; built from the repository's `src/herdr-chat` by `scripts/package.py`):
+**Mod** `mods/agent-chat/` (`mod.json` is `{"place":"none"}`; built from the repository's `src/agent-chat` by `scripts/package.py`):
 
 | Path | Role |
 |---|---|
@@ -147,7 +147,7 @@ the terminal itself belongs to the layout. The same mod runs twice: as the chat
   `~/.pi/agent/sessions`, OpenCode's database), their skill folders, terminal screens, and the
   process list, to find which session runs in each terminal;
 - types into terminals and stops a working agent with its own stop key;
-- writes image copies under `cache/herdr-chat/` and drawn diagrams under `cache/diagrams/` in the Herdr home, and deletes
+- writes image copies under `cache/agent-chat/` and drawn diagrams under `cache/diagrams/` in the Herdr home, and deletes
   its own files there after a day (delete that folder along with the mod to remove everything);
 - sets the app's `accent` and `selection` colours to a dimmed accent while it runs, so selected
   text stays visible in herdr's text boxes. Theme files stay as they are;
@@ -163,7 +163,7 @@ the terminal itself belongs to the layout. The same mod runs twice: as the chat
   either.
 - **Binary files:** read a written image back to confirm its size before using it.
 - **Thumbnails:** `image()` draws files inside the herdr home, so each preview is a copy in
-  `cache/herdr-chat/sent/`.
+  `cache/agent-chat/sent/`.
 - **Diagrams:** write the theme's colours into Pele's SVG directly; herdr's SVG renderer draws
   inline colours.
 - **List rows:** handle clicks with the virtual list's `on_item_click`.
@@ -176,7 +176,7 @@ the terminal itself belongs to the layout. The same mod runs twice: as the chat
 - **Sending:** send from the agent's machine without `HC_TERMINAL_ID` and `HC_SCOPE`, so the text
   arrives as plain typing.
 - **Debug files:** write them outside the mod's folder, since any write inside reloads the mod.
-- **Its name:** `mods/herdr-chat/` is written into its paths (`platform.js`, `common.js`,
+- **Its name:** `mods/agent-chat/` is written into its paths (`platform.js`, `common.js`,
   `terminal.js`, `components/session-reader.js`) and its shared keys start with `herdr-chat.`,
   so a renamed copy needs those changed too.
 - **Agent logs:** Codex continues a resumed session in its older logs and splits long ones into
@@ -197,7 +197,7 @@ the terminal itself belongs to the layout. The same mod runs twice: as the chat
 
 ## Done when
 
-- `herdr-app check ~/.config/herdr-app/mods/herdr-chat` passes and `herdr-app status` shows no
+- `herdr-app check ~/.config/herdr-app/mods/agent-chat` passes and `herdr-app status` shows no
   errors on the `herdr-chat` layout.
 - `npm test` passes on Linux or macOS.
 - A new tab for each supported agent opens on its chat, with the toggle in the header;

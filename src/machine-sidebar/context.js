@@ -44,7 +44,7 @@ export function refreshContext(view, cx, only, { footers = true } = {}) {
         }
         const codex = agents().filter(a => a.app === 'codex' && hostOf(a.address) === host);
         if (view.footersDue.delete(key)) {
-          // From each agent's log (its newest token_count), where herdr-chat found it; else from its footer, which Codex
+          // From each agent's log (its newest token_count), where agent-chat found it; else from its footer, which Codex
           // cuts off on a narrow terminal (as one behind the chat is), so it's the fallback.
           const fromLogs = await codexLogContext(host, codex);
           for (const a of codex) {
@@ -87,7 +87,7 @@ print(json.dumps(out))
 
 export async function codexLogContext(host, codex) {
   // Each Codex agent's context as its log's newest token_count gives it (last input tokens of the model's window), for the
-  // agents whose log herdr-chat found (its shared 'herdr-chat.paths', by address and start); { address: snapshot }.
+  // agents whose log agent-chat found (its shared 'herdr-chat.paths', by address and start); { address: snapshot }.
   const all = terminals();
   const list = codex.map(a => {
     const path = sessionOf(a.address, all)?.path;

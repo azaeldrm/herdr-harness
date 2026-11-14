@@ -95,7 +95,7 @@
                                                                                         "id":  "chat-panel",
                                                                                         "type":  "block",
                                                                                         "content":  {
-                                                                                                        "mod":  "herdr-chat",
+                                                                                                        "mod": "agent-chat",
                                                                                                         "props":  {
                                                                                                                       "role":  "chat",
                                                                                                                       "backdrop":  true
@@ -110,7 +110,7 @@
                                                                                                         "pane":  {
                                                                                                                      "header":  {
                                                                                                                                     "content":  {
-                                                                                                                                                    "mod":  "herdr-chat"
+                                                                                                                                                    "mod": "agent-chat"
                                                                                                                                                 },
                                                                                                                                     "reveal":  "always",
                                                                                                                                     "height":  42,
@@ -160,7 +160,7 @@
                                                                                                              "id":  "simulator",
                                                                                                              "type":  "block",
                                                                                                              "content":  {
-                                                                                                                             "mod":  "harns-emulator"
+                                                                                                                             "mod":  "emulator"
                                                                                                                          }
                                                                                                          }
                                                                                                      ],

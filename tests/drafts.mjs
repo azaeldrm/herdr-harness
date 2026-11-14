@@ -13,7 +13,7 @@ const check = (name, got, want) => {
   console.log(`${ok ? "PASS" : "FAIL"} ${name}${ok ? "" : `: got ${JSON.stringify(got)}`}`);
   if (!ok) failed++;
 };
-const pic = { name: "shot.png", file: "/h/cache/herdr-chat/a.png", rel: "cache/herdr-chat/a.png" };
+const pic = { name: "shot.png", file: "/h/cache/agent-chat/a.png", rel: "cache/agent-chat/a.png" };
 
 storeDraft("s1", { text: "look at this", attachments: [{ ...pic, extra: "dropped" }] });
 check("a kept draft brings its images back after a reload", savedDraft("s1"), { text: "look at this", attachments: [pic] });

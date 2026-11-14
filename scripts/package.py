@@ -18,9 +18,9 @@ SHARED = SRC / 'shared'
 
 # Each share folder and the mods it ships.
 LISTINGS = {
-    'layouts/harns': ['harns-chrome', 'harns-tabs', 'harns-settings', 'markdown-files', 'harns-emulator',
-                      'machine-sidebar', 'harns-status', 'herdr-chat'],
-    'layouts/herdr-chat': ['herdr-chat'],
+    'layouts/harns': ['harns-chrome', 'harns-tabs', 'harns-settings', 'markdown-files', 'emulator',
+                      'machine-sidebar', 'harns-status', 'agent-chat'],
+    'layouts/herdr-chat': ['agent-chat'],
 }
 
 # Editor files and caches never ship.

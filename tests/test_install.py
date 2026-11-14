@@ -23,10 +23,22 @@ class RetireTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             home = Path(directory)
             (home / 'mods' / 'machine-agents').mkdir(parents=True)
-            (home / 'cache' / 'herdr-chat' / 'diagrams').mkdir(parents=True)
             (home / 'cache' / 'herdr-chat' / 'sent').mkdir(parents=True)
+            (home / 'cache' / 'agent-chat' / 'sent').mkdir(parents=True)
             self.assertEqual(install.retire(home), ['machine-agents'])
-            self.assertEqual(sorted(p.name for p in (home / 'cache' / 'herdr-chat').iterdir()), ['sent'])
+            self.assertEqual(sorted(p.name for p in (home / 'cache').iterdir()), ['agent-chat'])
+
+    def test_a_mod_another_layout_still_uses_stays(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / 'mods' / 'herdr-chat').mkdir(parents=True)
+            (home / 'layouts').mkdir()
+            (home / 'layouts' / 'herdr-chat.json').write_text('{"children": [{"content": {"mod": "herdr-chat"}}]}')
+            (home / 'layouts' / 'harns.json').write_text('{"children": [{"content": {"mod": "herdr-chat"}}]}')
+            self.assertEqual(install.retire(home), [])
+            self.assertTrue((home / 'mods' / 'herdr-chat').is_dir())
+            (home / 'layouts' / 'herdr-chat.json').unlink()
+            self.assertEqual(install.retire(home), ['herdr-chat'])
 
 
 class CarryOverTests(unittest.TestCase):

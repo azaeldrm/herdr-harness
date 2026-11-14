@@ -1,7 +1,7 @@
 import importlib.util, sys
 from pathlib import Path
 
-path = Path(__file__).resolve().parent.parent / "layouts" / "herdr-chat" / "mods" / "herdr-chat" / "input-box.py"
+path = Path(__file__).resolve().parent.parent / "layouts" / "herdr-chat" / "mods" / "agent-chat" / "input-box.py"
 spec = importlib.util.spec_from_file_location("input_box", path)
 box = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(box)

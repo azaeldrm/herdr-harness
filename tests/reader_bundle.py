@@ -1,7 +1,7 @@
 import json, tempfile
 from pathlib import Path
 
-READERS = Path(__file__).resolve().parent.parent / "layouts" / "herdr-chat" / "mods" / "herdr-chat" / "readers"
+READERS = Path(__file__).resolve().parent.parent / "layouts" / "herdr-chat" / "mods" / "agent-chat" / "readers"
 
 def source():
     """The session reader as the mod sends it: readers/*.py joined in manifest order."""

@@ -113,7 +113,7 @@
                   "id": "chat-panel",
                   "type": "block",
                   "content": {
-                    "mod": "herdr-chat",
+                    "mod": "agent-chat",
                     "props": {
                       "role": "chat"
                     }
@@ -139,7 +139,7 @@
                       },
                       "header": {
                         "content": {
-                          "mod": "herdr-chat"
+                          "mod": "agent-chat"
                         },
                         "height": 42,
                         "position": "top",

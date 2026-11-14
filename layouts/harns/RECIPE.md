@@ -4,14 +4,14 @@ A dark, amber-accented herdr window organized by machine. The sidebar lists ever
 connected machine (hover it for a card of all its details; the Classic style adds live CPU, RAM
 and per-GPU load rings) and the agents running on it, each a two-line card with its session title, status,
 folder and branch, and context used. Agent tabs open as a
-chat (from herdr-chat, [its own listing](../herdr-chat/RECIPE.md) too) or their live terminal.
+chat (from agent-chat, [the herdr-chat layout](../herdr-chat/RECIPE.md) too) or their live terminal.
 A status bar shows where you are and how much Claude Code and Codex quota is left.
 
 ![harns](preview.png)
 
 To add it, run `./install.sh` from a clone of the repository (or `python scripts/install.py`). By hand, copy
 more than the layout and its mods, from this folder: `layouts/harns.json` with its picture `layouts/harns.svg` (the
-sketch Herdr's layout picker shows), every folder in `mods/` (herdr-chat's among them), `themes/harness.json` and
+sketch Herdr's layout picker shows), every folder in `mods/` (agent-chat's among them), `themes/harness.json` and
 `brand-assets/`, merge `programs.json`'s entries into yours, and add `layouts/harns.keys.json` to your `keys.json` as
 its `layout:harns` section.
 
@@ -31,7 +31,7 @@ Left to right: a sidebar, then the work column. There's no system title bar.
     there, a row of CPU, RAM and GPU rings (one per GPU, amber), then its agents. Each agent is a two-line card: the program icon, the
     session's own title (without the harness's prefix, and the folder Pi and Codex add after it; else the
     program's name) and its status; under it, in 11.5 px dim, a 14 × 3 px bar of its context window under the icon, as on the
-    rail, then its folder (the session's, from the log herdr-chat found for it,
+    rail, then its folder (the session's, from the log agent-chat found for it,
     shared `herdr-chat.paths`; else the pane's) and git branch. Sub-agents hang under their parent as a
     tree (26 px rows; in Tree their bot has no antenna, `harns-chrome/bot-small.svg`). In Tree the program's logo sits
     on the bot's corner on a halo of itself in the row's color (copies nudged 1 px each way), not a disc; a picture
@@ -85,7 +85,7 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
   Tabs show the same spinner, or a dot for blocked and done.
 - **Context readings:** Claude Code and Pi report through the relays (Watch out). Codex's
   reading is its log's newest `token_count` (last input tokens of the model's window), from the
-  log herdr-chat found for it (shared `herdr-chat.paths`); else its footer's "Context N% left",
+  log agent-chat found for it (shared `herdr-chat.paths`); else its footer's "Context N% left",
   when `context-remaining` is one of its `tui.status_line` items and the terminal is wide enough
   for Codex to show it. A machine's readings are fetched when one of its agents
   finishes a turn, appears or goes away, or the machine comes online, and cleared while it's
@@ -99,7 +99,7 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
   Alt+Down and Alt+Up (`agent.next`, `agent.prev`) walk the agents in the list's order: Pinned, then
   each machine top to bottom. Alt+Shift+Down and Alt+Shift+Up jump to the next or previous machine's top
   agent, coming round past the last (`machine-sidebar.next-machine`, `.prev-machine`). Alt+Left and Alt+Right show
-  the agent's Chat or Terminal (`layout.select` on the `chat-view` stack; herdr-chat follows). These keys are
+  the agent's Chat or Terminal (`layout.select` on the `chat-view` stack; agent-chat follows). These keys are
   `layouts/harns.keys.json`; the installer adds each to keys.json's `layout:harns` section unless that keystroke is
   bound there already, and keeps the old file as `keys.json.before-install-<time>` when it changes. Without a
   keys.json (Herdr not opened yet) it adds none and says so.
@@ -176,11 +176,11 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
     (`new-menu.js`, from `knownAgents({on})`), and with `{ loginBar }` the bar for logging in to a machine. Its ring
     row (`machine-metrics.js`), probes, icons and rings (`stats/`) are built in from the repository's `src/shared`.
   - `harns-tabs`: the tab bar; uses the shipped `new-menu` and `menu`.
-  - `harns-emulator`: the Simulator panel. herdr draws with DirectComposition, which covers
+  - `emulator`: the Simulator panel. herdr draws with DirectComposition, which covers
     child windows, so `harns-dock` (built once from `dock.cs` with Windows' own `csc.exe` into
-    `cache/harns-emulator/`) makes each emulator's window a borderless popup owned by
+    `cache/emulator/`) makes each emulator's window a borderless popup owned by
     herdr's, just above it. The mod writes the screen area, as gaps from the window's
-    bottom-right corner, to `cache/harns-emulator/dock-state.txt` only when it changes; the
+    bottom-right corner, to `cache/emulator/dock-state.txt` only when it changes; the
     helper follows herdr's window through WinEvent hooks and, after a click or key press in
     herdr, asks `herdr-app status` whether an overlay is open. Nothing runs per frame. The
     state also names the emulator to show and every other one, which it keeps hidden.
@@ -197,7 +197,7 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
     socket says an overlay is open. `quit` turns the rule off and gives the windows back.
   - `harns-status`: the status bar. It also collects the stats: a built copy of the shared machine code
     (`machine-data.js`) publishes shared `machine.stats`, `machine.usage` and `machine.local-label`.
-  - `herdr-chat` ([its own listing](../herdr-chat/RECIPE.md) too): the chat panel and the pane header with the toggle. The chat
+  - `agent-chat` ([the herdr-chat layout](../herdr-chat/RECIPE.md) too): the chat panel and the pane header with the toggle. The chat
     block passes it `backdrop: true`: an empty chat (a new session's welcome, or no agent in
     view) plays an animated scene behind it, dimmed (sharks, jellyfish, a night sky, rain),
     switched with a button at its bottom right; the reply box goes see-through while it plays.
@@ -271,8 +271,8 @@ connection).
 The installer writes only in the Herdr home, apart from the relays (see the README for the
 files they add or change). Over an older install it carries the renamed mods' saved state (`data/<name>`) and the
 keys bound to their commands to the new names (`machine-agents` is `machine-sidebar`, `workspace-status-machine` is
-`harns-status`, `harness-files` is `markdown-files`, `harness-simulator` is `harns-emulator`, and the other `harness-*`
-are `harns-*`), then removes the old copies, the mods harns no longer has (`machine-stats`, `machine-metrics`,
+`harns-status`, `harness-files` is `markdown-files`, `harness-simulator` is `emulator`, `herdr-chat` is `agent-chat`,
+and the other `harness-*` are `harns-*`), then removes the old copies (one another installed layout still uses stays), the mods harns no longer has (`machine-stats`, `machine-metrics`,
 `machine-new-menu`, `harness-pane`) and the caches only they wrote.
 
 **Notes for building it:**
@@ -292,7 +292,7 @@ are `harns-*`), then removes the old copies, the mods harns no longer has (`mach
   - for `machine-sidebar`, the stats icons and rings (`stats/`) and `context-relay.py` as `context-probe.js`.
   Edit `src/` and run it; `npm test` stops while a built copy is stale, then tests the built mods, and checks that no
   mod names a picture it doesn't have or one in another of these mods.
-- The chat and the toggle need herdr-chat; without it those blocks show errors. It's one of this folder's mods, and the
+- The chat and the toggle need agent-chat; without it those blocks show errors. It's one of this folder's mods, and the
   installer installs it with the rest (`--no-chat` leaves an installed copy as it is).
 - Claude's and Pi's context readings come from the relays (`scripts/install-context.py`) on each
   machine: the installer sets them up on this computer, and `--on MACHINE` on the others.
@@ -334,5 +334,5 @@ are `harns-*`), then removes the old copies, the mods harns no longer has (`mach
 - Folding the sidebar leaves icons, rings and statuses centered in the rail, each level with its row in the open list.
 - The status bar names the focused pane's machine and folder and fills the quota bars.
 - A new Claude Code tab opens on its chat and toggles to Terminal from its header.
-- Running the installer installs herdr-chat with the rest and removes the retired mods; running it again leaves no
+- Running the installer installs agent-chat with the rest and removes the retired mods; running it again leaves no
   layout backup behind.

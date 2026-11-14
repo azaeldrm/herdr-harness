@@ -65,7 +65,7 @@ offers the Simulator. Drag a machine's band to reorder the machines in the sideb
 
 ## Install
 
-Needs the Herdr app and Python 3 on each machine. The chat in agent tabs is herdr-chat, one of
+Needs the Herdr app and Python 3 on each machine. The chat in agent tabs is agent-chat, one of
 harns's mods: the installer installs it with the rest (`--no-chat` leaves an installed copy as it is).
 
 Ask your agent to add this layout, or run `./install.sh` from a clone (on Windows, from Git
@@ -82,7 +82,7 @@ Optional:
 
 - **Context bars** (on each agent's card) come from relays: Claude Code's status line and a Pi extension
   (`scripts/install-context.py`, on Windows, Linux and macOS). Codex's comes from its log
-  (the one herdr-chat found for it), else its footer, when `context-remaining` is one of its
+  (the one agent-chat found for it), else its footer, when `context-remaining` is one of its
   `tui.status_line` items. The Claude Code and Codex
   quota bars read the account from each service and need no relay.
   The installer sets the relays up on this computer (`--no-relays` to skip);
@@ -111,7 +111,7 @@ Optional:
   its virtual device says; storage is the virtual device's own. These are limits rather than
   reservations: cores are threads the system runs anywhere, and memory is taken as Android uses
   it (though memory Android has filled isn't given back until the emulator stops). The defaults
-  are in the Simulator mod's `emulator.json` (`src/harns-emulator/emulator.json` here); change them in `~/.config/herdr-app/harness.json`,
+  are in the Simulator mod's `emulator.json` (`src/emulator/emulator.json` here); change them in `~/.config/herdr-app/harness.json`,
   which updates don't overwrite, as `{ "emulator": { "default": { "memory": 6144 }, "devices":
   { "harns_phone": { "cores": 6 } } } }` (`memory` in MB, `cores`, `gpu`; `devices` by a virtual
   device's name, for that one only). The panel title's tooltip shows what the session's emulator
@@ -152,7 +152,7 @@ are entries in `src/shared/gpus.js`, with a place for AMD, Intel and Apple.
 - A listing is a folder under `layouts/` (or, for a mod on its own, `mods/`) with its `RECIPE.md`, `preview.png` and
   files; `package.py`'s `LISTINGS` says which mods each one ships.
 - Check with `herdr-app check <mod folder>`, `herdr-app status` and `herdr-app shot`.
-- Tests: `npm test` runs them all (the Python unit tests, harns's and herdr-chat's Node and Python tests, a check that
+- Tests: `npm test` runs them all (the Python unit tests, harns's and the chat's Node and Python tests, a check that
   the vendored Pele matches its pin, after `npm install` byte for byte, and a check that every listing is built from
   the current `src/`). A few of the chat's tests need Linux or macOS and say they're skipped on Windows. It finds Python 3
   as `python3`, `python` or `py -3`, so it runs as installed on Windows, Linux and macOS. The
@@ -160,6 +160,6 @@ are entries in `src/shared/gpus.js`, with a place for AMD, Intel and Apple.
   Python on Linux and macOS.
 - `markdown-files` is herdr's Files panel where Markdown and `.mmd` files open in a floating window as a readable
   document: images (beside the file or on its machine; web images show as links, never fetched) and
-  mermaid blocks drawn by Pele (the same vendored copy as herdr-chat's). Preview and
+  mermaid blocks drawn by Pele (the same vendored copy as agent-chat's). Preview and
   Source in its header switch views. To update Pele, change the pin in `package.json`, then run
   `npm install && npm run vendor:pele`.

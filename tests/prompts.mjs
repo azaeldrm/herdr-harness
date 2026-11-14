@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
-import { parseChoices, parsePrompt, keysFor, looksLikePrompt, typedAnswer, previewKey, fullPreview } from "../layouts/herdr-chat/mods/herdr-chat/model/prompts.js";
-import claudeCode from "../layouts/herdr-chat/mods/herdr-chat/harnesses/claude-code.js";
-import codex from "../layouts/herdr-chat/mods/herdr-chat/harnesses/codex.js";
-import pi from "../layouts/herdr-chat/mods/herdr-chat/harnesses/pi.js";
-import opencode from "../layouts/herdr-chat/mods/herdr-chat/harnesses/opencode.js";
+import { parseChoices, parsePrompt, keysFor, looksLikePrompt, typedAnswer, previewKey, fullPreview } from "../layouts/herdr-chat/mods/agent-chat/model/prompts.js";
+import claudeCode from "../layouts/herdr-chat/mods/agent-chat/harnesses/claude-code.js";
+import codex from "../layouts/herdr-chat/mods/agent-chat/harnesses/codex.js";
+import pi from "../layouts/herdr-chat/mods/agent-chat/harnesses/pi.js";
+import opencode from "../layouts/herdr-chat/mods/agent-chat/harnesses/opencode.js";
 
 let failed = false;
 const check = (name, ok) => { console.log(`${ok ? "ok" : "FAIL"}  ${name}`); if (!ok) failed = true; };

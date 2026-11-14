@@ -18,7 +18,7 @@ check("the same name in two terminals stays apart", previewName(placed("t4k", "s
 check("the same terminal on two machines stays apart", previewName(placed("t7", "same.png"), "server") === previewName(placed("t7", "same.png")), false);
 check("a Windows path and an odd machine name give a plain file name", previewName(String.raw`C:\Users\a\herdr-core\default\files\t7\x.png`, "my box/1"), "my-box-1~t7~x.png");
 
-const cache = join(s.home, "cache", "herdr-chat"), sent = join(cache, "sent");
+const cache = join(s.home, "cache", "agent-chat"), sent = join(cache, "sent");
 mkdirSync(cache, { recursive: true });
 const a = join(cache, "a.png"), b = join(cache, "b.png");
 writeFileSync(a, new Uint8Array([1, 2, 255])); writeFileSync(b, new Uint8Array([9]));
@@ -55,10 +55,10 @@ export const appHome = () => ${JSON.stringify(real.home)};
 export const hc = async () => ({ code: 1, stdout: "" });
 export const exec = (cmd, args) => new Promise(done => execFile(cmd, args, { maxBuffer: 64 * 1024 * 1024 }, (e, stdout, stderr) => done({ code: e ? (e.code ?? 1) : 0, stdout, stderr })));`);
 const live = await real.load("images.js");
-mkdirSync(join(real.home, "cache", "herdr-chat"), { recursive: true });
-mkdirSync(join(real.home, "mods", "herdr-chat"), { recursive: true });
-copyFileSync(join(real.dir, "mod", "prepare-image.sh"), join(real.home, "mods", "herdr-chat", "prepare-image.sh"));
-const away = join(real.dir, "herdr-core", "default", "files", "t7"), sentHere = join(real.home, "cache", "herdr-chat", "sent");
+mkdirSync(join(real.home, "cache", "agent-chat"), { recursive: true });
+mkdirSync(join(real.home, "mods", "agent-chat"), { recursive: true });
+copyFileSync(join(real.dir, "mod", "prepare-image.sh"), join(real.home, "mods", "agent-chat", "prepare-image.sh"));
+const away = join(real.dir, "herdr-core", "default", "files", "t7"), sentHere = join(real.home, "cache", "agent-chat", "sent");
 mkdirSync(away, { recursive: true });
 const tiny = join(away, "tiny.png"), tinyBytes = new Uint8Array([137, 80, 78, 71, 0, 255, 1, 2]);
 writeFileSync(tiny, tinyBytes);
@@ -87,7 +87,7 @@ if (hasMagick) {
   check("a big one is shrunk to its .jpg name", name, "local~t7~big.png.jpg");
   check("under the size limit", statSync(join(sentHere, name)).size <= 250000, true);
   check("and it's a real JPEG", [...readFileSync(join(sentHere, name)).subarray(0, 2)], [255, 216]);
-  check("no working copies stay behind", readdirSync(join(real.home, "cache", "herdr-chat")).sort(), ["sent"]);
+  check("no working copies stay behind", readdirSync(join(real.home, "cache", "agent-chat")).sort(), ["sent"]);
   check("the bubble finds it", live.previewFile(new Set(await live.sentNames()), big, null), "local~t7~big.png.jpg");
 }
 real.cleanup();

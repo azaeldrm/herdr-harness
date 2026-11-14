@@ -1,7 +1,7 @@
 import { shared, terminals } from 'herdr';
 
 export function sessionOf(address, all = terminals()) {
-  // What herdr-chat found of an agent's session (its shared 'herdr-chat.paths', by address and start): { path, hint, cwd }, or null.
+  // What agent-chat found of an agent's session (its shared 'herdr-chat.paths', by address and start): { path, hint, cwd }, or null.
   const t = all.find(x => x.address === address);
   return t ? (shared('herdr-chat.paths') ?? {})[`${address}:${t.created_ms}`] ?? null : null;
 }

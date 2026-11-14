@@ -4,19 +4,20 @@ from pathlib import Path
 LAYOUT = 'harns'
 # The harns listing's share folder: what this installs (its mods/ built from src/ by scripts/package.py).
 SHARE = Path('layouts') / LAYOUT
-CHAT = 'herdr-chat'
+CHAT = 'agent-chat'
 # Mods renamed since older installs: their saved state (data/<name>) and the keys bound to their commands follow them.
 RENAMED = {
     'harness-chrome': 'harns-chrome', 'harness-tabs': 'harns-tabs', 'harness-settings': 'harns-settings',
-    'harness-simulator': 'harns-emulator', 'workspace-status-machine': 'harns-status',
-    'machine-agents': 'machine-sidebar', 'harness-files': 'markdown-files',
+    'harness-simulator': 'emulator', 'workspace-status-machine': 'harns-status',
+    'machine-agents': 'machine-sidebar', 'harness-files': 'markdown-files', 'herdr-chat': 'agent-chat',
+    'harns-emulator': 'emulator',  # a name the emulator had briefly, before it was published
 }
 # Mods older harns installs added that harns no longer has, removed from the Herdr home: the renamed ones' old copies;
 # machine-stats and machine-metrics, now code built into the mods that use them; machine-new-menu, now part of
 # machine-sidebar; and harness-pane, which went unused.
 RETIRED = [*RENAMED, 'harness-pane', 'machine-stats', 'machine-metrics', 'machine-new-menu']
 # Caches only those old mods wrote (the diagrams are in cache/diagrams now, shared by Files and the chat).
-OLD_CACHES = ['cache/harness-files', 'cache/harness-simulator', 'cache/herdr-chat/diagrams']
+OLD_CACHES = ['cache/harness-files', 'cache/harness-simulator', 'cache/harns-emulator', 'cache/herdr-chat']
 
 
 def fail(message):
@@ -103,10 +104,18 @@ def back_up_if_changed(target, new, backup):
     return True
 
 
+def used_elsewhere(home, name):
+    """Whether another installed layout still uses the mod (its own herdr-chat layout, say): that one keeps it."""
+    pattern = re.compile(r'"mod":\s*"' + re.escape(name) + '"')
+    return any(pattern.search(p.read_text(encoding='utf-8', errors='ignore'))
+               for p in (home / 'layouts').glob('*.json') if p.name != f'{LAYOUT}.json')
+
+
 def retire(home):
-    """Removes the mods older harns installs added that harns no longer has, and the caches only they wrote (a file
-    still in use, like a running dock helper, stays until the next run). Returns the mods removed."""
-    removed = [name for name in RETIRED if (home / 'mods' / name).is_dir()]
+    """Removes the mods older harns installs added that harns no longer has, unless another installed layout still uses
+    one, and the caches only they wrote (a file still in use, like a running dock helper, stays until the next run).
+    Returns the mods removed."""
+    removed = [name for name in RETIRED if (home / 'mods' / name).is_dir() and not used_elsewhere(home, name)]
     for name in removed:
         shutil.rmtree(home / 'mods' / name)
     for cache in OLD_CACHES:
@@ -118,8 +127,12 @@ def carry_over(home, backup):
     """Moves a renamed mod's saved state to its new name, where the new one has none yet, and points keys.json's
     bindings at the new names (keeping a copy of keys.json first, as `backup`). Returns what it moved and rebound."""
     moved = []
-    for old, new in RENAMED.items():
-        if (home / 'data' / old).is_dir() and not (home / 'data' / new).exists():
+    # Newest first, so where two old names became one (harness-simulator, then harns-emulator), the latest state wins.
+    olds = sorted((old for old in RENAMED if (home / 'data' / old).is_dir()),
+                  key=lambda old: (home / 'data' / old).stat().st_mtime, reverse=True)
+    for old in olds:
+        new = RENAMED[old]
+        if not (home / 'data' / new).exists():
             shutil.copytree(home / 'data' / old, home / 'data' / new)
             moved.append(f'{old} -> {new}')
     rebound = []
@@ -160,7 +173,7 @@ def main():
 
     if subprocess.run([sys.executable, str(repo / 'scripts' / 'package.py')]).returncode != 0:
         fail('Building the share folders failed (scripts/package.py).')
-    # herdr-chat is one of the listing's mods; --no-chat leaves whatever copy is installed as it is.
+    # agent-chat is one of the listing's mods; --no-chat leaves whatever copy is installed as it is.
     mods = sorted(p.name for p in (share / 'mods').iterdir() if p.is_dir() and (chat or p.name != CHAT))
 
     if not same_folder(repo, home):

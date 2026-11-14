@@ -7,7 +7,7 @@ import { tmpdir } from "os";
 import { pathToFileURL, fileURLToPath } from "url";
 
 // The mod is copied beside stub packages for gpui-kit, gpui-base and herdr, then imported.
-const modDir = fileURLToPath(new URL("../layouts/harns/mods/harns-emulator", import.meta.url));
+const modDir = fileURLToPath(new URL("../layouts/harns/mods/emulator", import.meta.url));
 const work = mkdtempSync(join(tmpdir(), "harns-simulator-test-"));
 const pkg = (name, src) => {
   mkdirSync(join(work, "node_modules", name), { recursive: true });
@@ -38,7 +38,7 @@ const check = (name, got, want) => {
 
 // Specs: the mod's defaults under harness.json's `emulator`, per device too.
 globalThis.files = {
-  "HOME\\mods\\harns-emulator\\emulator.json": JSON.stringify({ default: { memory: 4096, cores: 4, gpu: "host" }, devices: { a: { gpu: "swiftshader_indirect" } } }),
+  "HOME\\mods\\emulator\\emulator.json": JSON.stringify({ default: { memory: 4096, cores: 4, gpu: "host" }, devices: { a: { gpu: "swiftshader_indirect" } } }),
   "HOME\\harness.json": JSON.stringify({ localMachineName: "pc", emulator: { default: { memory: 6144 }, devices: { a: { cores: 6 }, b: { memory: "4GB", gpu: "host gpu" } } } }),
 };
 const s = { specs: null, host: { sep: "\\" } };
