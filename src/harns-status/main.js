@@ -4,10 +4,12 @@ import { spaces, agents, panes, focused, theme, run, window, shared } from "herd
 
 import MachineData from "./machine-data.js";
 import { current } from "./usage.js";
+import { pullRequest } from "./pull-request.js";
+import { openUrl } from "./open-url.js";
 
 export default class WorkspaceStatus extends MachineData {
   init(props, cx) {
-    // Redraws the bar once a second, for the shown machine, folder and branch.
+    // Redraws the bar once a second, for the shown machine, folder, branch and its open PR.
     super.init(props, cx);
     if (shared("harness.status") === false) run("layout.hide", { id: "status" });
     cx.timer.every(1000, cx => cx.notify());
@@ -26,6 +28,9 @@ export default class WorkspaceStatus extends MachineData {
     const pane = allPanes.find(p => p.pane === focus?.pane) ?? allPanes.find(p => p.focused);
     const cwd = focus?.cwd ?? pane?.cwd ?? space?.folder;
     const folder = String(cwd ?? "").replace(/[\\/]+$/, "").split(/[\\/]/).at(-1) ?? "";
+    // The branch of that folder (the pane's, as Herdr reads it), else the space's, and its open pull request.
+    const branch = pane?.branch ?? space?.branch ?? null;
+    const pr = pullRequest(machine, cwd, branch);
     const usage = shared('machine.usage') ?? {};
     const clock = epoch => new Date(epoch * 1000).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
     const usageGroup = name => {
@@ -50,10 +55,19 @@ export default class WorkspaceStatus extends MachineData {
         .child(weekly ? bar('7d', 'sevenDay', 0.5) : bar('5h', 'fiveHour', 1));
     };
     const label = (icon, text) => h_flex().gap(6).items_center().child(svg(`mods/harns-status/icons/${icon}.svg`).size(13)).child(text);
+    // The open PR: its number and title, cut short; a click opens it on GitHub.
+    const pull = pr && h_flex().id("bottom-pr").min_w(0).gap(6).items_center().px(5).h(20).rounded(5).cursor_pointer()
+      .hover(s => s.bg(t.hover).text_color(t.foreground)).tooltip(`#${pr.number} ${pr.title} · open on GitHub`)
+      .on_click(() => openUrl(pr.url))
+      .child(svg("mods/harns-status/icons/git-pull-request.svg").size(13).flex_none().text_color(t.accent))
+      .child(div().flex_none().text_color(t.foreground).child(`#${pr.number}`))
+      .child(div().min_w(0).max_w(320).truncate().child(pr.title));
     return h_flex().size_full().px(14).gap(16).items_center().bg(t.surface).text_size(11.8).text_color(t.muted)
+      // Where you are, left to right: the machine, the folder, its branch, and the branch's open PR.
       .child(label(space?.machine ? "hard-drive" : "monitor", space?.machine ?? shared("machine.local-label") ?? "This computer"))
-      .when(Boolean(space?.branch), el => el.child(label("branch", space.branch)))
       .when(Boolean(folder), el => el.child(label("folder", folder)))
+      .when(Boolean(branch), el => el.child(label("branch", branch)))
+      .when(Boolean(pull), el => el.child(pull))
       .when(needs > 0, el => el.child(div().text_color(t.blocked).child(`${needs} needs you`)))
       .child(div().flex_1())
       .child(h_flex().flex_none().gap(18).items_center()

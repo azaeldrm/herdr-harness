@@ -59,8 +59,9 @@ Left to right: a sidebar, then the work column. There's no system title bar.
 - **Work area** (12 px padding): the shown tab, as a chat (where a new agent session starts) or as terminal cards (10 px
   radius, 1 px `border`, a 42 px header with the Chat / Terminal toggle). Files,
   Changes or Simulator open in a 368 px panel on the right.
-- **Status bar** (42 px, `surface`): the shown space's machine and branch, the focused
-  pane's folder, "N needs you" when agents on that machine are blocked, then Claude Code and Codex quota bars (44 × 4 px)
+- **Status bar** (42 px, `surface`): the shown space's machine, the focused pane's folder and its branch, that
+  branch's open pull request (an amber PR icon, `#number` and its title, cut short), "N needs you" when agents on
+  that machine are blocked, then Claude Code and Codex quota bars (44 × 4 px)
   and "Ctrl Shift P commands" (each can be turned off in harns's Settings, and the bar hidden).
 
 The theme is `harness`: background `#080a0b`, canvas `#060708`, text `#dededb`, accent and
@@ -157,9 +158,11 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
   start. They're passed as `emulator` flags so they apply to every copy of a device too: memory
   and cores only as whole numbers, gpu as one word, anything else left out and named in the
   status. The title's tooltip shows them.
-- **Status bar:** each quota bar shows the 5-hour window and switches to 7 days while
-  hovered, red above 90%; the tooltip gives the reset time. The last item opens the
-  command palette.
+- **Status bar:** the pull request comes from the GitHub CLI (`gh pr view` in the focused pane's folder, on its machine),
+  kept per machine, folder and branch and asked again when one changes or after 3 minutes; it shows only while open,
+  and not where gh is missing or not signed in. Hovering it gives its full title; a click opens it in the browser.
+  Each quota bar shows the 5-hour window and switches to 7 days while hovered, red above 90%; the tooltip gives the
+  reset time. The last item opens the command palette.
 
 ## Built from
 
@@ -332,7 +335,8 @@ and the other `harness-*` are `harns-*`), then removes the old copies (one anoth
 - Each connected machine has a group with its agents under it (in Classic, with live CPU, RAM and GPU rings),
   and dragging a band reorders the machines; a working agent spins and the logo fades.
 - Folding the sidebar leaves icons, rings and statuses centered in the rail, each level with its row in the open list.
-- The status bar names the focused pane's machine and folder and fills the quota bars.
+- The status bar names the focused pane's machine, folder and branch, links the branch's open PR, and fills the quota
+  bars.
 - A new Claude Code tab opens on its chat and toggles to Terminal from its header.
 - Running the installer installs agent-chat with the rest and removes the retired mods; running it again leaves no
   layout backup behind.

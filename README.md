@@ -56,7 +56,8 @@ the agent runs on (below).
 
 ![The Simulator panel](docs/simulator.png)
 
-The status bar shows the Claude Code and Codex quota left.
+The status bar shows where you are (machine, folder, branch, and the branch's open pull request, a click away) and the
+Claude Code and Codex quota left.
 
 **Settings of its own.** The harns logo in the sidebar's footer opens harns's Settings: this computer's name, the
 sidebar's style (Tree, agents hanging from their machine on lines, or Classic, each machine boxed with its agents and

@@ -9,6 +9,7 @@ import { document } from "./markdown.js";
 import { hasQueuedDiagrams, renderQueuedDiagrams } from "./diagrams.js";
 import { hash } from "./hash.js";
 import { forgetImages, takeChanged } from "./images.js";
+import { openUrl } from "./open-url.js";
 
 function location() {
   const space = spaces().find(s => s.active), f = focused();
@@ -47,12 +48,6 @@ async function directory(path, on) {
   return out;
 }
 
-function openOutside(url) {
-  // Web and mail links open in the system's handler, as TextView would have.
-  if (!/^(https?|mailto):/i.test(url)) return;
-  if (appHome().includes("\\")) exec("rundll32", ["url.dll,FileProtocolHandler", url]).catch(() => {});
-  else exec("open", [url]).catch(() => exec("xdg-open", [url]).catch(() => {}));
-}
 
 export default class Files extends View {
   init(_props, cx) {
@@ -218,7 +213,7 @@ export default class Files extends View {
     // A link in a document: a file beside it opens here, a web address in the browser.
     const target = this.file ? resolveLink(this.file, url) : null;
     if (target) { this.show(target, cx); cx.notify(); }
-    else openOutside(url);
+    else openUrl(url);
   }
 
   rows(prefix, depth, out, t) {
