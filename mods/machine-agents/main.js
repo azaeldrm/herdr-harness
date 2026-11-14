@@ -48,9 +48,9 @@ const contextText = used => healthBars() ? `${Math.round(100 - used)}% left` : `
 
 function contextBar(t, used, width, height = 3) {
   // The context window as harns's Settings chose: filling with what's used (gray, amber past 75%, red past 90%), or
-  // as a health bar draining to what's left (green, amber below 25% left, red below 10%).
+  // as a health bar draining to what's left (green, amber below 45% left, red below 25%).
   const health = healthBars(), share = health ? 100 - used : used;
-  const color = health ? (share < 10 ? "#d88179" : share < 25 ? t.working : t.ansi2 ?? t.done) : (share > 90 ? "#d88179" : share > 75 ? t.working : t.muted);
+  const color = health ? (share < 25 ? "#d88179" : share < 45 ? t.working : t.ansi2 ?? t.done) : (share > 90 ? "#d88179" : share > 75 ? t.working : t.muted);
   return div().w(width).h(height).flex_none().rounded_full().bg(t.border)
     .when(share > 0, el => el.child(div().h_full().rounded_full().w(Math.max(2, Math.round(width * share / 100))).bg(color)));
 }
@@ -108,13 +108,59 @@ function icon(p, size, color) {
   return p.icon.endsWith('.svg') ? svg(p.icon).size(size).flex_none().text_color(color) : image(p.icon).w(size).h(size).flex_none();
 }
 
-function agentPic(t, p, size, color, ring, sub = false) {
+// One hop of a working agent's logo, up and down, in ms; GROUND: where its feet land in the 16 px icon slot (the logo
+// ends about 8 px into its 12 px box, which sits at top 10).
+const HOP_MS = 700, GROUND = 18.8;
+// Eight 1 px nudges: copies of a glyph at these offsets, in the background's color, make a halo that follows its outline.
+const HALO = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+
+function badgeOf(p, size, color, ring) {
+  // A program's logo set on the bot: a one-color glyph sits on a halo of itself in the row's color (copies nudged 1 px
+  // every way), which hides the bot behind it and fills the glyph's small gaps, shaped like the logo; a picture, which
+  // can't be recolored, sits on a disc of that color. Its box is the logo plus 1 px all round.
+  if (!p?.icon) return null;
+  if (!p.icon.endsWith('.svg')) return div().p(1).rounded_full().bg(ring).child(image(p.icon).w(size).h(size).flex_none());
+  return haloed(p.icon, size, color, ring);
+}
+
+function haloed(src, size, color, ring) {
+  // A one-color glyph on a halo of itself in the row's color: copies nudged 1 px every way, under it.
+  const glyph = (dx, dy, c) => svg(src).size(size).flex_none().text_color(c).absolute().left(1 + dx).top(1 + dy);
+  return div().relative().size(size + 2).flex_none()
+    .children(HALO.map(([dx, dy]) => glyph(dx, dy, ring)))
+    .child(glyph(0, 0, color));
+}
+
+function agentPic(t, p, size, color, ring, sub = false, hop = false, tint = null, corner = null) {
   // The agent icon (a sub-agent's: the same bot without its antenna), with its program's icon small at its bottom right
-  // on a ring of the row's color.
-  const mark = icon(p, Math.round(size * 0.65), color);
-  return div().relative().size(size).flex_none()
-    .child(svg(`mods/harness-chrome/${sub ? "bot-small" : "bot"}.svg`).size(size).flex_none().text_color(color))
-    .when(Boolean(mark), el => el.child(div().absolute().right(-5).bottom(-4).p(1).rounded_full().bg(ring).child(mark)));
+  // on a halo of the row's color (badgeOf). `hop` (working; the view's beat, { n, up, go }): that logo hops in amber
+  // from side to side over the bot, its halo masking the bot as it passes, a ripple spreading where it lands.
+  const bot = svg(`mods/harness-chrome/${sub ? "bot-small" : "bot"}.svg`).size(size).flex_none().text_color(color);
+  // The logo's color: amber while it hops (working), else `tint` (amber, still: it needs you mid-task), else the row's.
+  const badge = badgeOf(p, Math.round(size * 0.65), hop ? t.working : tint ?? color, ring);
+  // `corner`: a mark on its own halo right above the logo (its column, right -5), as if the logo spoke: "ask" (it needs
+  // you) a red question mark, the health bar's red; "done" (finished, not yet looked at) the green check.
+  const mark = corner === "ask" ? ["mods/harness-chrome/question.svg", "#d88179"]
+    : corner === "done" ? ["mods/machine-agents/circle-check.svg", t.ansi2 ?? t.done] : null;
+  const cornerMark = () => haloed(mark[0], Math.round(size * 0.6), mark[1], ring).absolute().right(-5).top(-3);
+  if (!hop || !badge) return div().relative().size(size).flex_none().child(bot)
+    .when(Boolean(badge), el => el.child(badge.absolute().right(-5).bottom(-4)))
+    .when(Boolean(mark), el => el.child(cornerMark()));
+  // The view's beat (hopTick) drives it, each step a native transition: across to the other side over one hop at an
+  // even pace while it rises (slowing) and falls (speeding up), so it traces a round arc. Every landing starts a fresh
+  // ripple ring there, spreading and fading, so ring and landing stay together however long it runs.
+  const to = hop.n % 2 ? 12 : 7, landed = hop.n % 2 ? 7 : 12;
+  const ripple = () => {
+    // A thin oval (ripple.svg, stretched to its size), spreading fast and slowing as it fades.
+    const w = hop.go ? 16 : 5, h = hop.go ? 4 : 1.4, policy = { duration: 480, easing: "ease-out" };
+    return svg("mods/harness-chrome/ripple.svg").id(`ripple-${hop.n}`).absolute().left(landed + 6 - w / 2).top(GROUND - h / 2).w(w).h(h)
+      .text_color(t.working).opacity(hop.go ? 0 : 0.9)
+      .transition("width", policy).transition("height", policy).transition("left", policy).transition("top", policy).transition("opacity", policy);
+  };
+  return div().relative().size(size).flex_none().child(bot)
+    .when(hop.n > 0, el => el.child(ripple()))
+    .child(div().absolute().top(10).left(to).transition("left", { duration: HOP_MS, easing: "linear" })
+      .child(badge.relative().top(hop.up ? -4 : 0).transition("top", { duration: HOP_MS / 2, easing: hop.up ? "ease-out" : "ease-in" })));
 }
 
 const READ_AFTER = [1000, 4000];
@@ -143,6 +189,9 @@ export default class Agents extends View {
     // A reload starts the list at the top, where scrollY starts (the list would otherwise keep its old place).
     this.scrollHandle = ScrollHandle.new();
     this.scrollHandle.scroll_to_item(0);
+    // The working logos' beat (agentPic): every half hop it lands (a new hop and ripple) or reaches the top of its arc.
+    this.hop = { n: 0, up: false, go: false };
+    cx.timer.every(HOP_MS / 2, (cx) => this.hopTick(cx));
     cx.timer.every(1000, (cx) => {
       this.noticeOs(cx);
       this.noticeTurns(cx);
@@ -197,6 +246,17 @@ export default class Agents extends View {
     // Its system's icon once known, else a drive (another machine) or a screen (this computer).
     const os = this.osIcons?.[machine?.name ?? ""];
     return os ? `mods/machine-agents/os/${os}.svg` : `mods/harness-chrome/${machine?.name ? "hard-drive" : "monitor"}.svg`;
+  }
+
+  hopTick(cx) {
+    // Half a hop: landing starts the next hop (its ripple drawn small, then let go to spread on the next frame), or the
+    // top of the arc turns it down. Nothing to draw while no logo hops.
+    if (!this.hopping) return;
+    const h = this.hop;
+    if (h.up) { h.up = false; cx.notify(); return; }
+    h.n++; h.up = true; h.go = false;
+    cx.notify();
+    cx.timer.after(30, (cx) => { h.go = true; cx.notify(); });
   }
 
   headerIcon(machine) {
@@ -629,12 +689,17 @@ export default class Agents extends View {
     // white or gray instead, so the same rows stand out open and folded.
     const bright = on || st !== "idle";
     const color = on ? t.accent : compact && bright ? t.foreground : t.muted;
-    const pic = classic() ? icon(k.program, 14, color) : agentPic(t, k.program, 14, color, on ? t.raised : t.surface, true);
+    const ring = this.hoveredSub === k.address ? t.hover : on ? t.raised : t.surface;
+    const pic = classic() ? icon(k.program, 14, color) : agentPic(t, k.program, 14, color, ring, true);
     const name = k.name || k.template || k.program?.name || k.address;
     // One box, open or on the rail: 26 px, its shade when looked at, hover, and a click to peek. Inside: open, the tree
     // lines, the icon, the name and its status; on the rail the icon alone, centred, with the name in its tooltip.
     const box = h_flex().id(`sub-${k.address}`).relative().h(26).flex_none().items_center().rounded(8)
       .when(on, (el) => el.bg(t.raised)).hover((s) => s.bg(t.hover)).cursor_pointer()
+      .on_hover((over, cx) => {
+        if (over) this.hoveredSub = k.address; else if (this.hoveredSub === k.address) this.hoveredSub = null;
+        cx.notify();
+      })
       .on_click(() => this.peek(k.address));
     if (compact) return box.justify_center().tooltip(name).child(pic ?? this.status(t, { status: st }, true));
     return box
@@ -709,6 +774,7 @@ export default class Agents extends View {
     const t = theme();
     if (props()?.loginBar) return this.loginBar(t);
     const collapsed = narrow();
+    this.hopping = false;
     let list = agents();
     this.listed = new Map(list.map((a) => [a.address, a.status]));
     const all = terminals();
@@ -765,41 +831,31 @@ export default class Agents extends View {
     };
 
     const row = (a, i, subs = []) => {
-      const pic = classic() ? icon(a.program, 16, a.focused ? t.accent : t.muted) : agentPic(t, a.program, 16, a.focused ? t.accent : t.muted, a.focused ? t.selected : t.surface);
-      if (collapsed) {
-        // The open card's box (border, padding, two lines of the same text sizes, kept by invisible text), so rows keep their
-        // height as the sidebar folds; on the rail everything is centred: the icon, and its status under it.
-        return v_flex()
-          .id(`ag-${a.address}`)
-          .relative()
-          .py(6)
-          .gap(2)
-          .flex_none()
-          .rounded(6)
-          // The focus stripe's 2 px matched on the right, so the centre stays the rail's.
-          .border_l(2).pr(2).border_color(a.focused ? t.accent : t.surface)
-          .when(a.focused, (el) => el.bg(t.selected))
-          .cursor_pointer()
-          .hover((s) => s.bg(t.hover))
-          .on_click(() => run("pane.focus", { pane: a.pane }))
-          // Resting on it shows the agent's details card beside the rail, as open.
-          .on_hover((on, cx) => { if (on) this.detailsEnter(a.address, cx); else this.detailsLeave(a.address, cx); })
-          .child(this.hang(a.address, this.agentDetails(t, a, all, label(a) || a.space_name || "")))
-          .child(h_flex().items_center().justify_center()
-            .child(h_flex().w(16).flex_none().justify_center().when(Boolean(pic), el => el.child(pic)))
-            .child(div().w(0).overflow_hidden().child(" "))
-            // As tall as the open first line when that has its fold or "Needs you" (18 px).
-            .when(subs.length > 0 || a.status === "blocked", el => el.child(div().w(0).h(18).flex_none())))
-          // The second line (its height from invisible text) holds the status mark, under the icon.
-          .child(div().relative().w_full().text_size(11.5).child(div().w(0).overflow_hidden().child(" "))
-            .child(h_flex().absolute().top(0).bottom(0).left(0).right(0).items_center().justify_center().child(this.status(t, a, true))));
-      }
-      const idle = a.status === "idle" && !a.focused;
+      // With the Health bar context bars (Tree) the logo carries the status (agentPic): it hops in amber while working;
+      // a green check (finished, not yet looked at) or a red question mark (it needs you) sits above it. So the
+      // spinner, check and "Needs you" badge go, and on the rail its second line is always the health bar.
+      const logoStatus = !classic() && healthBars() && Boolean(a.program?.icon);
+      const hops = logoStatus && a.status === "working", finished = logoStatus && a.status === "done", asks = logoStatus && a.status === "blocked";
+      // The badge's ring is the card's own shade, so it sits on the card: hovered, in front, or plain.
+      const ring = this.hovered === a.address ? t.hover : a.focused ? t.selected : t.surface;
+      // The icons' color: the agent in front's amber, others gray; when the logo carries the status, white for the agent
+      // in front (its logo still amber while it works or waits on you), gray for the rest.
+      const iconColor = logoStatus ? (a.focused ? t.foreground : t.muted) : a.focused ? t.accent : t.muted;
+      if (hops) this.hopping = true;
+      const pic = classic() ? icon(a.program, 16, a.focused ? t.accent : t.muted)
+        : agentPic(t, a.program, 16, iconColor, ring, false, hops ? this.hop : null, asks ? t.working : null, asks ? "ask" : finished ? "done" : null);
+      // The name: white while it's working, finished, needs you or is in front, gray when idle; when the logo carries the
+      // status, white only for the agent in front.
+      const idle = logoStatus ? !a.focused : a.status === "idle" && !a.focused;
       const isPinned = this.pins.includes(a.address);
       const pin = div()
         .id(`pin-${a.address}`)
+        // The status mark's 14 px slot, so nothing moves when it swaps in.
+        .size(14)
         .flex_none()
-        .p(2)
+        .flex()
+        .items_center()
+        .justify_center()
         .rounded(4)
         .text_color(t.dim)
         .cursor_pointer()
@@ -811,7 +867,7 @@ export default class Agents extends View {
           this.hovered = null;
           cx.notify();
         })
-        .child(svg(`mods/harness-chrome/${isPinned ? "pin-off" : "pin"}.svg`).size(13));
+        .child(svg(`mods/harness-chrome/${isPinned ? "pin-off" : "pin"}.svg`).size(12));
       const full = isPinned;
       const name = label(a) || a.space_name || "";
       // Line 2: where it works (folder · branch, and its space where the list doesn't group by it); context used as a small bar.
@@ -831,12 +887,13 @@ export default class Agents extends View {
       const dropHere = this.drag?.moved && this.drop?.target === a.address;
       // A card that moved gets a new id and starts where it was, then slides to its place (noticeMoves).
       const slide = this.slides?.[a.address];
-      return (v_flex()
+      // One card, open or on the rail: its box (the focus stripe, its shade), hover with its details card beside the
+      // sidebar, dragging, and a click to focus it. Only what's inside differs, below.
+      const card = v_flex()
         .id(`ag-${a.address}-${this.moveGen?.[a.address] ?? 0}`)
         .relative()
         .top(slide ?? 0)
         .transition("top", { duration: 280, easing: "ease-out" })
-        .px(8)
         .py(6)
         .gap(2)
         .flex_none()
@@ -875,7 +932,21 @@ export default class Agents extends View {
           if (this.dragged) { this.dragged = false; return; }
           run("pane.focus", { pane: a.pane });
         })
-        .when(dropHere, el => el.child(div().absolute().left(6).right(6).h(2).rounded_full().bg(t.accent).when(this.drop.after, d => d.bottom(-1)).when(!this.drop.after, d => d.top(-1))))
+        .when(dropHere, el => el.child(div().absolute().left(6).right(6).h(2).rounded_full().bg(t.accent).when(this.drop.after, d => d.bottom(-1)).when(!this.drop.after, d => d.top(-1))));
+      if (collapsed) {
+        // On the rail: the same two lines, each as tall as open (kept by invisible text), everything centred: the icon,
+        // and its status under it. The focus stripe's 2 px is matched on the right, so the centre stays the rail's.
+        return card.pr(2)
+          .child(h_flex().items_center().justify_center()
+            .child(h_flex().w(16).flex_none().justify_center().when(Boolean(pic), el => el.child(pic)))
+            .child(div().w(0).overflow_hidden().child(" "))
+            // As tall as the open first line when that has its fold or "Needs you" (18 px).
+            .when(subs.length > 0 || (a.status === "blocked" && !asks), el => el.child(div().w(0).h(18).flex_none())))
+          .child(div().relative().w_full().text_size(11.5).child(div().w(0).overflow_hidden().child(" "))
+            .child(h_flex().absolute().top(0).bottom(0).left(0).right(0).items_center().justify_center()
+              .child(this.status(t, logoStatus ? { ...a, status: "idle" } : a, true))));
+      }
+      return card.px(8)
         .child(h_flex().w_full().gap(8).items_center()
           .when(Boolean(pic), el => el.child(div().id(`agent-fold-${a.address}`)
             .when(subs.length > 0, el => el.on_click((_e, cx) => {
@@ -885,8 +956,8 @@ export default class Agents extends View {
             })).child(pic)))
           .child(div().flex_1().min_w(0).truncate().text_color(idle ? t.muted : t.foreground).child(name))
           .when(subs.length > 0, el => el.child(fold(a, subs)))
-          .when(this.hovered === a.address, el => el.child(pin))
-          .child(this.status(t, a)))
+          // Resting on the card, the pin takes the status mark's place.
+          .child(this.hovered === a.address ? pin : hops || finished || asks ? div().size(14).flex_none() : this.status(t, a)))
         // Always two lines (the rail's rows match their height).
         .child(h_flex().w_full().gap(8).items_center().text_size(11.5).text_color(t.dim)
           .when(Boolean(pic), el => el.child(h_flex().w(16).flex_none().justify_center().when(Boolean(bar), c => c.child(bar))))
@@ -896,7 +967,7 @@ export default class Agents extends View {
               .when(glyph === "folder", el => el.flex_none()).when(glyph !== "folder", el => el.min_w(0))
               .child(svg(`mods/harness-chrome/${glyph}.svg`).size(11).flex_none().text_color(t.dim))
               .child(div().min_w(0).truncate().child(text)))))
-          .when(!pic && Boolean(bar), el => el.child(bar))));
+          .when(!pic && Boolean(bar), el => el.child(bar)));
     };
 
     const groups = pinned.length ? [{ id: "pinned", label: "Pinned", status: null, members: pinned }] : [];

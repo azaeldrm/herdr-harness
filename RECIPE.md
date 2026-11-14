@@ -36,7 +36,9 @@ Left to right: a sidebar, then the work column. There's no system title bar.
     program's name) and its status; under it, in 11.5 px dim, a 14 × 3 px bar of its context window under the icon, as on the
     rail, then its folder (the session's, from the log herdr-chat found for it,
     shared `herdr-chat.paths`; else the pane's) and git branch. Sub-agents hang under their parent as a
-    tree (26 px rows; in Tree their bot has no antenna, `harness-chrome/bot-small.svg`). Its terminals that aren't agents (a shell, a dev server, lazygit) follow its agents, a 28 px row
+    tree (26 px rows; in Tree their bot has no antenna, `harness-chrome/bot-small.svg`). In Tree the program's logo sits
+    on the bot's corner on a halo of itself in the row's color (copies nudged 1 px each way), not a disc; a picture
+    icon keeps the disc. Its terminals that aren't agents (a shell, a dev server, lazygit) follow its agents, a 28 px row
     each: the program's icon in the agents' icon column, the program running now and its folder; a click focuses it and
     shows the Terminal view; on the rail, just the icon, on the agents' axis, with the rest in its tooltip. The machine's
     name is followed by its counts, each with its icon: agents (a bot), and terminals (`>_`) when it has any.
@@ -51,6 +53,9 @@ Left to right: a sidebar, then the work column. There's no system title bar.
     harns's Settings (the logo, a 760 px dialog from `harness-settings`: General, Sidebar, Chat, Status bar, Simulator,
     which write shared `harness.local-name`, `harness.sidebar`, `harness.context-bar`, `herdr-chat.chat`, `herdr-chat.animation`,
     `harness.status`, `harness.quota.claude`, `harness.quota.codex`, `harness.commands-hint` and `harness.simulator`).
+    A choice between options (the sidebar's style, its context bars) is a row of picture cards, as Herdr's settings
+    show layouts: each a small live drawing of what it gives, the chosen one outlined in amber with a check, and what it
+    does under them. On/off settings are switches.
 - **Tab bar** (42 px, `chrome` `#0b0d0e`, drags the window): the space's tabs as labels
   with the program icon, the active one underlined in amber (2 px) with a close button;
   then +, Files, Changes, Simulator (Windows and Linux), and the window buttons on Windows and Linux.
@@ -71,8 +76,15 @@ working `#e9aa35`, done `#10a7a7`, idle `#80868b`, borders `#25282b`. Fonts are 
   `ansi2`); idle shows nothing open (the card's bar under the icon shows its context) and, on the rail, the same
   14 × 3 px context bar. It fills with the share used (gray, amber above 75%, red `#d88179` above 90%), or, with
   shared `harness.context-bar` `health` (Settings → Sidebar → Context bar), drains like a health bar to the share left
-  (green, amber below 25% left, red below 10%); hovering it gives the percentage either way. On the
+  (green, amber below 45% left, red below 25%); hovering it gives the percentage either way. On the
   rail the mark sits on the row's second line, under the icon.
+  With the Health bar (Tree), the program logo carries the status instead: working, it hops in amber from side to side
+  over the bot in a round arc (even pace across, easing up and down), an amber ripple ring spreading where it lands
+  (`harness-chrome/ripple.svg`, an oval stretched as it grows). The sidebar drives it, one beat per half hop, each step
+  a native transition and a fresh ring each landing, so ring and landing never drift apart. Above the logo, on its own
+  halo: the green check (done, until it's looked at) or a red question mark (`harness-chrome/question.svg`, blocked; the
+  logo stays amber). So there's no spinner, check or "Needs you" badge; on the rail every agent's second line is its
+  context bar; names and icons are gray but for the agent in front's, white.
   Tabs show the same spinner, or a dot for blocked and done.
 - **Context readings:** Claude Code and Pi report through the relays (Watch out). Codex's
   reading is its log's newest `token_count` (last input tokens of the model's window), from the
