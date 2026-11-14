@@ -1,6 +1,0 @@
-{
-  "alt-left": { "command": "layout.select", "args": { "stack": "chat-view", "child": "chat-panel" } },
-  "alt-right": { "command": "layout.select", "args": { "stack": "chat-view", "child": "terminal-panel" } },
-  "alt-shift-down": "machine-agents.next-machine",
-  "alt-shift-up": "machine-agents.prev-machine"
-}

@@ -1,0 +1,4 @@
+{
+  "default": { "memory": 4096, "cores": 4, "gpu": "host" },
+  "devices": {}
+}

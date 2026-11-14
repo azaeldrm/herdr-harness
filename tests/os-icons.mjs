@@ -1,5 +1,5 @@
 // The machine icons: each system's probe words pick the right icon, and every icon named has its file.
-import { ICONS, distroIcon } from '../mods/machine-agents/os-icons.js';
+import { ICONS, distroIcon } from '../layouts/harns/mods/machine-sidebar/os-icons.js';
 import { existsSync } from 'fs';
 
 let failed = 0;
@@ -19,7 +19,7 @@ check('FreeBSD by its kernel (no os-release)', distroIcon('  FreeBSD'), 'freebsd
 check('an unknown Linux is Tux', distroIcon('mydistro  Linux'), 'linux');
 check('no answer at all is Tux', distroIcon(''), 'linux');
 
-const files = new URL('../mods/machine-agents/os/', import.meta.url);
+const files = new URL('../layouts/harns/mods/machine-sidebar/os/', import.meta.url);
 for (const name of new Set([...Object.values(ICONS), 'windows', 'apple', 'linux']))
   check(`os/${name}.svg is there`, existsSync(new URL(`${name}.svg`, files)), true);
 

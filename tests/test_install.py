@@ -1,7 +1,6 @@
 import importlib.util
 import json
 from pathlib import Path
-import subprocess
 import tempfile
 import unittest
 
@@ -10,48 +9,71 @@ install = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(install)
 
 
-def chat_repo(folder):
-    """A git repository shaped like herdr-chat, with one file in its mod."""
-    mod = folder / 'mods' / 'herdr-chat'
-    mod.mkdir(parents=True)
-    (mod / 'main.js').write_text('export default class Chat {}\n')
-    git = ['git', '-c', 'user.name=test', '-c', 'user.email=test@example.com', '-C', str(folder)]
-    subprocess.run(git + ['init', '--quiet'], check=True)
-    subprocess.run(git + ['add', '.'], check=True)
-    subprocess.run(git + ['commit', '--quiet', '-m', 'chat'], check=True)
-    return str(folder)
-
-
-class InstallChatTests(unittest.TestCase):
-    def test_a_missing_chat_mod_is_installed(self):
+class RetireTests(unittest.TestCase):
+    def test_retired_mods_go_and_the_rest_stay(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            home = root / 'home'
-            (home / 'mods').mkdir(parents=True)
-            self.assertEqual(install.install_chat(home, chat_repo(root / 'chat')), 'installed')
-            self.assertTrue((home / 'mods/herdr-chat/main.js').is_file())
-            self.assertFalse((home / 'mods/.herdr-chat.new').exists())
+            home = Path(directory)
+            for name in ('machine-stats', 'harness-pane', 'machine-sidebar', 'mine'):
+                (home / 'mods' / name).mkdir(parents=True)
+            self.assertEqual(sorted(install.retire(home)), ['harness-pane', 'machine-stats'])
+            self.assertEqual(sorted(p.name for p in (home / 'mods').iterdir()), ['machine-sidebar', 'mine'])
+            self.assertEqual(install.retire(home), [])
 
-    def test_an_installed_chat_mod_is_kept(self):
+    def test_a_renamed_mods_old_copy_and_its_caches_go(self):
         with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            home = root / 'home'
-            (home / 'mods/herdr-chat').mkdir(parents=True)
-            (home / 'mods/herdr-chat/main.js').write_text('mine\n')
-            self.assertEqual(install.install_chat(home, chat_repo(root / 'chat')), 'kept')
-            self.assertEqual((home / 'mods/herdr-chat/main.js').read_text(), 'mine\n')
+            home = Path(directory)
+            (home / 'mods' / 'machine-agents').mkdir(parents=True)
+            (home / 'cache' / 'herdr-chat' / 'sent').mkdir(parents=True)
+            (home / 'cache' / 'agent-chat' / 'sent').mkdir(parents=True)
+            self.assertEqual(install.retire(home), ['machine-agents'])
+            self.assertEqual(sorted(p.name for p in (home / 'cache').iterdir()), ['agent-chat'])
 
-    def test_a_source_that_cannot_be_reached_installs_nothing(self):
+    def test_a_mod_another_layout_still_uses_stays(self):
         with tempfile.TemporaryDirectory() as directory:
-            home = Path(directory) / 'home'
-            (home / 'mods').mkdir(parents=True)
-            with self.assertRaises(Exception):
-                install.install_chat(home, str(Path(directory) / 'missing'))
-            self.assertFalse((home / 'mods/herdr-chat').exists())
+            home = Path(directory)
+            (home / 'mods' / 'herdr-chat').mkdir(parents=True)
+            (home / 'layouts').mkdir()
+            (home / 'layouts' / 'herdr-chat.json').write_text('{"children": [{"content": {"mod": "herdr-chat"}}]}')
+            (home / 'layouts' / 'harns.json').write_text('{"children": [{"content": {"mod": "herdr-chat"}}]}')
+            self.assertEqual(install.retire(home), [])
+            self.assertTrue((home / 'mods' / 'herdr-chat').is_dir())
+            (home / 'layouts' / 'herdr-chat.json').unlink()
+            self.assertEqual(install.retire(home), ['herdr-chat'])
+
+
+class CarryOverTests(unittest.TestCase):
+    def test_saved_state_and_keys_follow_a_renamed_mod(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            (home / 'data' / 'machine-agents').mkdir(parents=True)
+            (home / 'data' / 'machine-agents' / 'pins').write_text('["t1"]')
+            (home / 'keys.json').write_text(json.dumps({
+                'global': {'ctrl-t': 'tab.new'},
+                'layout:harns': {'alt-shift-down': 'machine-agents.next-machine', 'alt-right': {'action': 'layout.select', 'args': {}}}}))
+            moved, rebound = install.carry_over(home, home / 'keys.backup.json')
+            self.assertEqual(moved, ['machine-agents -> machine-sidebar'])
+            self.assertEqual((home / 'data' / 'machine-sidebar' / 'pins').read_text(), '["t1"]')
+            self.assertEqual(rebound, ['machine-agents.next-machine'])
+            keys = json.loads((home / 'keys.json').read_text())
+            self.assertEqual(keys['layout:harns']['alt-shift-down'], 'machine-sidebar.next-machine')
+            self.assertEqual(keys['layout:harns']['alt-right']['action'], 'layout.select')
+            self.assertEqual(keys['global'], {'ctrl-t': 'tab.new'})
+            self.assertTrue((home / 'keys.backup.json').exists())
+            self.assertEqual(install.carry_over(home, home / 'second.json'), ([], []))
+            self.assertFalse((home / 'second.json').exists())
+
+    def test_the_new_name_keeps_its_own_state(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            for name, pins in (('machine-agents', 'old'), ('machine-sidebar', 'new')):
+                (home / 'data' / name).mkdir(parents=True)
+                (home / 'data' / name / 'pins').write_text(pins)
+            self.assertEqual(install.carry_over(home, home / 'backup.json'), ([], []))
+            self.assertEqual((home / 'data' / 'machine-sidebar' / 'pins').read_text(), 'new')
 
 
 class MergeKeysTests(unittest.TestCase):
-    OURS = Path(__file__).parents[1] / 'layouts/harns.keys.json'
+    OURS = Path(__file__).parents[1] / 'layouts/harns/layouts/harns.keys.json'
 
     def test_missing_keys_are_added_and_the_rest_kept(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -63,7 +85,7 @@ class MergeKeysTests(unittest.TestCase):
             self.assertNotIn('alt-left', added)
             self.assertEqual(data['layout:harns']['alt-left'], 'mine')
             self.assertEqual(data['layout:harns']['alt-right']['args']['child'], 'terminal-panel')
-            self.assertEqual(data['layout:harns']['alt-shift-down'], 'machine-agents.next-machine')
+            self.assertEqual(data['layout:harns']['alt-shift-down'], 'machine-sidebar.next-machine')
             self.assertEqual(data['global'], {'alt-left': 'pane.go:left'})
             self.assertTrue((root / 'backup.json').exists())
 

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-77.5 -228 811 811" width="811" height="811">
+  <defs>
+    <path id="panel" d="M0,36 Q0,0 31.2,18 L330.8,191 Q362,209 362,245 L362,523 Q362,559 330.8,541 L31.2,368 Q0,350 0,314 Z"/>
+  </defs>
+  <use href="#panel" xlink:href="#panel" transform="translate(294,-204)" fill="currentColor" fill-opacity="0.35"/>
+  <use href="#panel" xlink:href="#panel" transform="translate(220.5,-153)" fill="currentColor" fill-opacity="0.5"/>
+  <use href="#panel" xlink:href="#panel" transform="translate(147,-102)" fill="currentColor" fill-opacity="0.65"/>
+  <use href="#panel" xlink:href="#panel" transform="translate(73.5,-51)" fill="currentColor" fill-opacity="0.8"/>
+  <use href="#panel" xlink:href="#panel" fill="currentColor"/>
+</svg>

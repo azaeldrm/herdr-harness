@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Harness: a herdr layout with a machine-organized sidebar, agent and usage telemetry, and its own look. npm is tooling only: Pele is pinned here and copied into mods/harness-files/vendor/pele by `npm run vendor:pele`.",
+  "description": "harns: Herdr layouts and mods (harns, herdr-chat, and the mods they share as listings). npm is tooling only: Pele is pinned here and copied into src/harness-files/vendor/pele and src/herdr-chat/vendor/pele by `npm run vendor:pele`.",
   "devDependencies": {
     "pele": "1.13.0"
   },
   "scripts": {
     "test": "node scripts/test.mjs",
     "vendor:pele": "node scripts/vendor-pele.mjs",
-    "check:pele": "node scripts/vendor-pele.mjs --check"
+    "check:pele": "node scripts/vendor-pele.mjs --check",
+    "package": "python scripts/package.py"
   }
 }

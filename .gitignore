@@ -3,37 +3,18 @@
 !/.gitattributes
 !/README.md
 !/LICENSE
-!/RECIPE.md
 !/install.sh
 !/package.json
 !/package-lock.json
-!/preview.png
 !/docs/
-!/programs.json
 !/scripts/
 !/tests/
-!/brand-assets/
-!/themes/
-/themes/*
-!/themes/harness.json
+# Each mod's source: the one copy to edit.
+!/src/
+# Share folders: what herdr.dev lists and an agent installs from. Their mods/ are built from src/
+# by scripts/package.py; the rest of each folder (RECIPE.md, preview.png, layouts/, themes/...) is edited here.
 !/layouts/
-/layouts/*
-!/layouts/harns.json
-!/layouts/harns.png
-!/layouts/harns.keys.json
 !/mods/
-/mods/*
-!/mods/harness-chrome/
-!/mods/harness-files/
-!/mods/harness-pane/
-!/mods/harness-settings/
-!/mods/harness-simulator/
-!/mods/harness-tabs/
-!/mods/machine-agents/
-!/mods/machine-metrics/
-!/mods/machine-new-menu/
-!/mods/machine-stats/
-!/mods/workspace-status-machine/
 
 gpui-kit.d.ts
 jsconfig.json

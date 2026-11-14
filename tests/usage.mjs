@@ -1,4 +1,4 @@
-import { fromProbe, servicesOf, current } from '../mods/machine-stats/usage.js';
+import { fromProbe, servicesOf, current } from '../layouts/harns/mods/harns-status/usage.js';
 
 let failed = 0;
 const check = (name, got, want) => {
